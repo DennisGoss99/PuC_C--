@@ -1,0 +1,33 @@
+private fun consumeComments() {
+        if(!iter.hasNext())
+            return
+
+        if(iter.peek() != '/')
+            return
+
+        iter.next()
+
+        when(val c = iter.next()){
+            '/' ->{
+                while(iter.hasNext() && iter.next() != '\n'){}
+                consumeWhitespace()
+                consumeComments()
+            }
+            '*' ->{
+                while(iter.peek() != '*'){
+                    if(iter.peek() == '/' ){
+                        consumeComments()
+                    }else{
+                        iter.next()
+                    }
+                }
+                iter.next()
+                iter.next()
+                consumeWhitespace()
+                consumeComments()
+            }
+            else -> throw Exception("Unexpected char: '$c'")
+        }
+
+    }
+}
