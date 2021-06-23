@@ -1,0 +1,4 @@
+package Parser
+
+class Parser {
+}
