@@ -1,9 +1,26 @@
 import Lexer.Lexer
+import Lexer.LexerToken
 
+fun test(input: String) {
+    println("Lexing: $input")
+    val lexer = Lexer(input)
+    while (lexer.peek() != LexerToken.EOF) {
+        println(lexer.next())
+    }
+    println(lexer.next())
+}
 
 fun main(){
 
-    println("Hallo Welt\n")
+    val code = """
+            int Hallo(int a, char[] b){
+            return 0;
+            }
+        """.trimIndent()
+
+    test(code);
+
+
 
     /* Todo:
        1.
@@ -14,28 +31,6 @@ fun main(){
        6.
      */
 
-    val code = """
-        
-        if (){
-        
-        }ELSE{
-        }
-        
-        
-        int TEST(){
-            i = 4;
-        }
-        
-        int Test;
-        
-        fun void main(){
-        }
-        
-        
-        
-    """.trimIndent()
-
-    Lexer()
 
 
 }

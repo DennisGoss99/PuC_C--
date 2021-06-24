@@ -42,7 +42,7 @@ sealed class LexerToken {
         object Greater : LexerToken()            // >
         object GreaterEqual : LexerToken()       // >=
 
-        data class Identify(val identify: String) : LexerToken()
+        data class Ident(val identify: String) : LexerToken()
 
         // Literals
         data class Boolean_Literal(val b: Boolean) : LexerToken()
