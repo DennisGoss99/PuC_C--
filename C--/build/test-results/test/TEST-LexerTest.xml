@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="LexerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-06-24T13:42:10" hostname="DESKTOP-FEB07TN" time="0.047">
-  <properties/>
-  <testcase name="functionLexerTest2" classname="LexerTest" time="0.047"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
