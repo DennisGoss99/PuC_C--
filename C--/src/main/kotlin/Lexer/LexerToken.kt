@@ -12,12 +12,10 @@ sealed class LexerToken {
         object While : LexerToken()
         object Return : LexerToken()
         object Struct : LexerToken()
-        object Void : LexerToken()
-
 
         // Symbols
-
-        object Equals : LexerToken()             // =
+        object AssignEquals : LexerToken()       // =
+        object Equals : LexerToken()             // :=
         object Semicolon : LexerToken()          // ;
         object Lparen : LexerToken()             // (
         object Rparen : LexerToken()             // )
@@ -42,7 +40,9 @@ sealed class LexerToken {
         object Greater : LexerToken()            // >
         object GreaterEqual : LexerToken()       // >=
 
-        data class Ident(val identify: String) : LexerToken()
+        data class NameIdent(val identify: String) : LexerToken()
+        data class TypeIdent(val identify: String) : LexerToken()
+        data class FunctionIdent(val identify: String) : LexerToken()
 
         // Literals
         data class Boolean_Literal(val b: Boolean) : LexerToken()

@@ -34,7 +34,14 @@ class Lexer(input: String) {
                     iterator.next()
                     LexerToken.Double_Equals
                 }
-                else -> LexerToken.Equals
+                else -> LexerToken.AssignEquals
+            }
+            ':' -> when (iterator.peek()) {
+                '=' -> {
+                    iterator.next()
+                    LexerToken.Equals
+                }
+                else -> throw Exception("Unexpected char: '$c' after char ':'")
             }
             '&' -> when (iterator.peek()) {
                 '&' -> {
@@ -72,6 +79,12 @@ class Lexer(input: String) {
                 else -> LexerToken.Greater
             }
 
+            '§' -> if (iterator.peek().isJavaIdentifierStart()) {
+                LexerToken.NameIdent(identBase(iterator.next()))
+            }else
+                throw Exception("Unexpected char: '$c' after char '$'")
+
+
             '\'' -> getChar()
             '\"' -> getString()
             else -> when {
@@ -98,11 +111,17 @@ class Lexer(input: String) {
         return LexerToken.Number_Literal(result.toInt())
     }
 
-    private fun ident(c: Char): LexerToken {
+    private fun identBase(c: Char): String {
         var result = c.toString()
         while (iterator.hasNext() && (iterator.peek().isJavaIdentifierPart() || iterator.peek() == '[' || iterator.peek() == ']')) {
             result += iterator.next()
         }
+        return result;
+    }
+
+    private fun ident(c: Char): LexerToken {
+        var result = identBase(c);
+
         return when (result) {
             "true" -> LexerToken.Boolean_Literal(true)
             "false" -> LexerToken.Boolean_Literal(false)
@@ -111,8 +130,12 @@ class Lexer(input: String) {
             "while" -> LexerToken.While
             "return" -> LexerToken.Return
             "struct" -> LexerToken.Struct
-            "void" -> LexerToken.Void
-            else -> LexerToken.Ident(result)
+            else -> {
+                if(result[0].isLowerCase())
+                    LexerToken.TypeIdent(result)
+                else
+                    LexerToken.FunctionIdent(result)
+            }
         }
     }
 
