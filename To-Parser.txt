@@ -1,0 +1,21 @@
+Expressions
+- Loops, loop mit return
+
+Statements
+- Loops, die kein return haben
+- 
+
+Declaration
+- Enden immer mit Semicolon (;) 
+- 
+
+
+
+
+Closure _> aka struct
+
+
+
+Printline LexerToken?
+
+Body List from Declarations
