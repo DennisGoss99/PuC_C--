@@ -11,5 +11,5 @@ sealed class Statement // Grün
 
     data class If(val conndition : Expression, val ifBody : Body, val elseBody : Body?) : Statement()
     data class While(val conndition : Expression, val body : Body) : Statement()
-    data class Block(val body : Body)
+    data class Block(val body : Body): Statement()
 }
