@@ -2,15 +2,40 @@ package Parser
 
 import Lexer.Lexer
 import Lexer.LexerToken
-import Parser.ParserToken.Type
+import Parser.ParserToken.*
 
 class Parser(val lexer: Lexer)
 {
-    fun DoStuff()
+    private val aplTree: Declaration.FunctionDeclare? = null
+
+    private inline fun <reified A> FetchNextExpectedToken(expectedType: String): A
+    {
+        val next = lexer.next()
+
+        if (next !is A)
+        {
+            throw Exception("Unexpected token: expected $expectedType, but got $next")
+        }
+
+        return next
+    }
+
+
+    fun ParsingStart()
+    {
+        println("Hello")
+
+
+    }
+}
+
+/*
+
+    fun ParsingStart() : Declaration.FunctionDeclare
     {
         while (true)
         {
-            val token = lexer.next()
+            val token = lexer.peek()
             val isFinished = token == LexerToken.EOF
 
             println(token.toString())
@@ -59,40 +84,161 @@ class Parser(val lexer: Lexer)
                 -> KeyWordParse(token)
 
                 LexerToken.TypeIdent("int")
-                -> TypeIdetifyer(Type.Integer)
+                -> TypeDeclaration()
 
                 LexerToken.TypeIdent("char")
-                -> TypeIdetifyer(Type.Char)
+                -> TypeDeclaration()
 
                 LexerToken.TypeIdent("bool")
-                -> TypeIdetifyer(Type.Boolean)
+                -> TypeDeclaration()
 
                 LexerToken.TypeIdent("float")
-                -> TypeIdetifyer(Type.Float)
+                -> TypeDeclaration()
 
                 //else -> throw java.lang.Exception("Unkown token detected! <$token>")
             }
         }
     }
 
-    fun OperatorParse(currentToken : LexerToken)
+    */
+
+/*
+    fun NameParse() : String
+    {
+        val name = FetchNextExpectedToken<LexerToken.TypeIdent>("name")
+
+        return name.identify
+    }
+
+    fun StatementListParse() : List<Statement>
     {
 
     }
 
-    fun KeyWordParse(currentToken : LexerToken)
+    fun BodyParse() : Body
+    {
+        val expectedLCurly = FetchNextExpectedToken<LexerToken.LCurlyBrace>("name")
+        val
+
+        // Parse declartions
+
+        // Parse statements
+
+        return Body()
+    }
+
+    fun ParameterParse() : List<Parameter>?
+    {
+        val parameterList = mutableListOf<Parameter>()
+        val expectedLBrace = FetchNextExpectedToken<LexerToken.Lparen>("name")
+
+        while (true)
+        {
+            val token = lexer.peek()
+
+            if(token is LexerToken.Rparen)
+            {
+                lexer.next()
+                break;
+            }
+        }
+
+        if(parameterList.size == 0)
+        {
+            return null
+        }
+
+        return parameterList
+    }
+
+    fun FuncitonParse() : Declaration.FunctionDeclare
+    {
+        val type = TypeParse()
+        val name = NameParse()
+        val parameter = ParameterParse()
+        val body = BodyParse()
+
+
+        return Declaration.FunctionDeclare(type, name, body, parameter)
+
+        /*
+        // is This token a ')'
+        if(nextToken is LexerToken.Rparen)
+        {
+            // We have no parameters
+
+        }
+
+        // We have parameters!
+        // Could be another declartion
+
+        val lcurlyBrace = FetchNextExpectedToken<LexerToken.LCurlyBrace>("LCurlyBrace")
+
+
+        val returnToken = FetchNextExpectedToken<LexerToken.Return>("Return")
+        */
+    }
+
+    fun ExpressionParse() : Expression
     {
 
     }
 
-    fun TypeIdetifyer(type : Type)
+    fun StatementParse() : Statement
     {
+        val type = TypeParse()
+        val expression = ExpressionParse()
 
+        return Statement(type, expression)
     }
 
-    fun FunctionParse(currentToken : LexerToken)
+    fun TypeParse() : Type
     {
+        val variableType = FetchNextExpectedToken<LexerToken.TypeIdent>("LexerToken.TypeIdent")
 
+        return when(variableType.identify)
+        {
+            "int" -> Type.Integer
+            "bool" -> Type.Boolean
+            "char" -> Type.Char
+            "string" -> Type.String
+            "float" -> Type.Float
+            "double" -> Type.Double
+            else -> throw java.lang.Exception("Invalid Type is not known <$variableType>.")
+        }
+    }
+
+    fun VariableDeclaration() : Declaration.VariableDeclaration
+    {
+        val type = TypeParse()
+        val variableName = FetchNextExpectedToken<LexerToken.TypeIdent>("LexerToken.TypeIdent as FunctionName")
+        val expression = ExpressionParse()
+
+        return Declaration.VariableDeclaration(type, variableName.identify, expression)
+    }
+
+    fun TypeDeclaration()
+    {
+        /*
+        val returnType = FetchNextExpectedToken<LexerToken.TypeIdent>("Type Idefifyer")
+        val mainName = FetchNextExpectedToken<LexerToken.TypeIdent>("Type Idefifyer")
+
+        // Whats the next token?
+        val nextToken = lexer.next()
+
+        // If you find '=', its a variable declaration
+        if(nextToken is LexerToken.Equals)
+        {
+            VariableDeclaration()
+        }
+
+        // if you find '(' its a function
+        if(nextToken is LexerToken.Lparen)
+        {
+            FuncitonParse()
+        }
+
+        throw Exception("Unexpected Type in TypeDeclaration : should bw '=' or '(' got '$nextToken'")*/
     }
 
 
@@ -296,4 +442,3 @@ class Parser(val lexer: Lexer)
     }
 
  */
-}
