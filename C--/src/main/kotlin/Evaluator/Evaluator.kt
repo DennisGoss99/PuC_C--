@@ -82,23 +82,30 @@ class Evaluator {
                 environment.getOrDefault(expression.variableName,null) ?: globalEnvironment.getOrDefault(expression.variableName,null) ?: throw Exception("Variable couldn't be found ${expression.variableName}")
             }
             is Expression.Operation -> {
-                return when(expression.operator){
-
-                    Operator.DoubleEquals -> equalsValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x==y}
-                    Operator.Plus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x+y}
-                    Operator.Minus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x-y}
-                    Operator.Multiply -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x*y}
-                    Operator.And -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x&&y}
-                    Operator.Or -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x||y}
-                    Operator.Not -> TODO()
-                    Operator.NotEqual -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x!=y}
-                    Operator.Less -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<y}
-                    Operator.LessEqual -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<=y}
-                    Operator.Greater -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>y}
-                    Operator.GreaterEquals -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>=y}
-
-                    Operator.Equals -> throw Exception("In this position operator: '=' isn't allowed")
+                if(expression.expressionB == null){
+                    return when(expression.operator){
+                        Operator.Not -> Expression.Value(ConstantValue.Boolean(!(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Boolean ?: throw Exception("Booleans can only be negated")).value))
+                        else -> throw Exception("Operation ${expression.operator} needs more then one Argument")
+                    }
+                    throw Exception("In this position operator: '=' isn't allowed")
                 }
+                else
+                    return when(expression.operator){
+                        Operator.DoubleEquals -> equalsValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x==y}
+                        Operator.Plus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x+y}
+                        Operator.Minus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x-y}
+                        Operator.Multiply -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x*y}
+                        Operator.And -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x&&y}
+                        Operator.Or -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x||y}
+
+                        Operator.NotEqual -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x!=y}
+                        Operator.Less -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<y}
+                        Operator.LessEqual -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<=y}
+                        Operator.Greater -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>y}
+                        Operator.GreaterEquals -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>=y}
+                        Operator.Not -> throw Exception("to many Arguments. 'Not' only needs one")
+                        Operator.Equals -> throw Exception("In this position operator: '=' isn't allowed")
+                    }
             }
             is Expression.FunctionCall ->{
                 val function = functionDeclarations.get(expression.functionName) ?: throw Exception("Couldn't find function '${expression.functionName}'")
