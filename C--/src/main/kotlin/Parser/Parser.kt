@@ -350,7 +350,7 @@ class Parser(val lexer: Lexer) {
 
     fun AssignmentParse() : Statement.AssignValue
     {
-        val type = TypeParse()
+        val type = NameParse()
         val expression = ExpressionParse()
 
         return Statement.AssignValue(type, expression)

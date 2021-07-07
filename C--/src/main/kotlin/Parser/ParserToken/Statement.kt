@@ -7,7 +7,7 @@ sealed class Statement // Grün
         return this.javaClass.simpleName
     }
 
-    data class AssignValue(val value : Type, val expression: Expression) : Statement()
+    data class AssignValue(val variableName : String, val expression: Expression) : Statement()
 
 
 
