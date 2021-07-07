@@ -13,6 +13,7 @@ sealed class ConstantValue
         {
             return "$value : $type"
         }
+
     }
 
     data class ConstChar(val value : Char, val type: Type.Char = Type.Char) : ConstantValue()

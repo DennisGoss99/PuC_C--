@@ -7,10 +7,11 @@ sealed class Declaration // Lila
     }
 
     data class FunctionDeclare(
-        val returnType : Type,
-        val functionName : kotlin.String,
-        val body : Body,
-        val parameters : List<Parameter>?)
+        val returnType: Type,
+        val functionName: String,
+        val body: Body,
+        val parameters : List<Parameter>?
+    ) : Declaration()
 
-    data class VariableDeclaration(val type: Type, val name: String, val expression : Expression)
+    data class VariableDeclaration(val type: Type, val name: String, val expression : Expression) : Declaration()
 }

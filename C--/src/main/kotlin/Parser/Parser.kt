@@ -167,7 +167,7 @@ class Parser(val lexer: Lexer) {
         val parameter = ParameterParse()
         val body = BodyParse()
 
-        return Declaration.FunctionDeclare(type, name, body, parameter)
+        return Declaration.FunctionDeclare(type, name, body,parameter)
 
         /*
         // is This token a ')'
