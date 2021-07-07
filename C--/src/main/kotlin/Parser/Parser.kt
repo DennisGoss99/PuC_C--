@@ -3,7 +3,6 @@ package Parser
 import Lexer.Lexer
 import Lexer.LexerToken
 import Parser.ParserToken.*
-import java.text.ParseException
 
 class Parser(val lexer: Lexer) {
     private val aplTree: Declaration.FunctionDeclare? = null
@@ -222,7 +221,7 @@ class Parser(val lexer: Lexer) {
         val parameter = ParameterParse()
         val body = BodyParse()
 
-        return Declaration.FunctionDeclare(type, name, body, parameter)
+        return Declaration.FunctionDeclare(type, name, body,parameter)
 
         /*
         // is This token a ')'
