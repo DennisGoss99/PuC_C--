@@ -8,7 +8,7 @@ sealed class Expression
     }
 
     // Operator is a value
-    data class Calculation(val operator: Operator, val expressionA: Expression, val expressionB: Expression) : Expression()
+    data class Operation(val operator: Operator, val expressionA: Expression, val expressionB: Expression?) : Expression()
 
     data class UseVariable(val variableName : String) : Expression()
 

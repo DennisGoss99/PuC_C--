@@ -3,7 +3,6 @@ package Parser
 import Lexer.Lexer
 import Lexer.LexerToken
 import Parser.ParserToken.*
-import java.text.ParseException
 
 class Parser(val lexer: Lexer) {
     private val aplTree: Declaration.FunctionDeclare? = null
@@ -27,11 +26,20 @@ class Parser(val lexer: Lexer) {
         return token
     }
 
-    fun ParsingStart() : Declaration.FunctionDeclare
+    fun ParsingStart() : Declaration.FunctionDeclare // Return List<Declarations>
     {
+        var functionMain : Declaration.FunctionDeclare? = null
+
         println("-----<Starting Parsing>-----")
 
-        val functionMain = FuncitonParse()
+        try
+        {
+            functionMain = FuncitonParse()
+        }
+        catch(e : Exception)
+        {
+            e.printStackTrace()
+        }
 
         if(lexer.peek() is LexerToken.EOF)
         {
@@ -53,87 +61,17 @@ class Parser(val lexer: Lexer) {
             }
         }
 
+        if(functionMain == null)
+        {
+            throw Exception("Parsing failed")
+        }
+
         return functionMain
     }
 
-
-    /*
-
-        fun ParsingStart() : Declaration.FunctionDeclare
-        {
-            while (true)
-            {
-                val token = lexer.peek()
-                val isFinished = token == LexerToken.EOF
-
-                println(token.toString())
-
-                if(isFinished)
-                {
-                    break;
-                }
-
-                when(token)
-                {
-                    // Operator
-                    LexerToken.Plus,
-                    LexerToken.Minus,
-                    LexerToken.Mul,
-                    LexerToken.Double_Equals,
-                    LexerToken.And,
-                    LexerToken.Or,
-                    LexerToken.NotEqual,
-                    LexerToken.LessEqual,
-                    LexerToken.GreaterEqual,
-                    LexerToken.Greater,
-                    LexerToken.Less,
-                    LexerToken.Not
-                    -> OperatorParse(token);
-
-                    // Keywords
-                    LexerToken.If,
-                    LexerToken.Else,
-                    LexerToken.Return,
-                    LexerToken.Struct,
-                    LexerToken.While
-                    -> KeyWordParse(token)
-
-                    // Symbol
-                    LexerToken.AssignEquals,
-                    LexerToken.Equals,
-                    LexerToken.Semicolon,
-                    LexerToken.Lparen,
-                    LexerToken.Rparen,
-                    LexerToken.LBracket,
-                    LexerToken.RBracket,
-                    LexerToken.LCurlyBrace,
-                    LexerToken.RCurlyBrace,
-                    LexerToken.Comma
-                    -> KeyWordParse(token)
-
-                    LexerToken.TypeIdent("int")
-                    -> TypeDeclaration()
-
-                    LexerToken.TypeIdent("char")
-                    -> TypeDeclaration()
-
-                    LexerToken.TypeIdent("bool")
-                    -> TypeDeclaration()
-
-                    LexerToken.TypeIdent("float")
-                    -> TypeDeclaration()
-
-                    //else -> throw java.lang.Exception("Unkown token detected! <$token>")
-                }
-            }
-        }
-
-        */
-
-
     fun NameParse(): String
     {
-        val name = FetchNextExpectedToken<LexerToken.TypeIdent>("name")
+        val name = FetchNextExpectedToken<LexerToken.NameIdent>("name")
 
         return name.identify
     }
@@ -171,7 +109,7 @@ class Parser(val lexer: Lexer) {
         while(true)
         {
             val token = lexer.peek()
-            val searchNextExpression = token is LexerToken.Semicolon
+            val searchNextExpression = token is LexerToken.RCurlyBrace
 
             if(searchNextExpression)
             {
@@ -190,7 +128,7 @@ class Parser(val lexer: Lexer) {
         val expectedLCurly = FetchNextExpectedToken<LexerToken.LCurlyBrace>("LCurlyBrace")
         val localVariables = LocalVariablesParse()
         val statementList = StatementListParse()
-        val expectedRCurly = FetchNextExpectedToken<LexerToken.RCurlyBrace>("RCurlyBrace")
+       // val expectedRCurly = FetchNextExpectedToken<LexerToken.RCurlyBrace>("RCurlyBrace")
 
         return Body(statementList, localVariables)
     }
@@ -215,10 +153,17 @@ class Parser(val lexer: Lexer) {
         return parameterList
     }
 
+    fun FunctionIdentifyParse() : String
+    {
+        val name = FetchNextExpectedToken<LexerToken.FunctionIdent>("function idefiyer")
+
+        return name.identify
+    }
+
     fun FuncitonParse(): Declaration.FunctionDeclare
     {
         val type = TypeParse()
-        val name = NameParse()
+        val name = FunctionIdentifyParse()
         val parameter = ParameterParse()
         val body = BodyParse()
 
@@ -265,21 +210,21 @@ class Parser(val lexer: Lexer) {
         }
     }
 
-    fun CalulationParse(leftExpression : Expression) : Expression.Calculation
+    fun CalulationParse(leftExpression : Expression) : Expression.Operation
     {
         val operator = OperatorParse()
         val rightExpression = ExpressionParse()
 
-        return Expression.Calculation(operator, leftExpression, rightExpression)
+        return Expression.Operation(operator, leftExpression, rightExpression)
     }
 
-    fun CalulationParse() : Expression.Calculation
+    fun CalulationParse() : Expression.Operation
     {
         val leftExpression = ExpressionParse()
         val operator = OperatorParse()
         val rightExpression = ExpressionParse()
 
-        return Expression.Calculation(operator, leftExpression, rightExpression)
+        return Expression.Operation(operator, leftExpression, rightExpression)
     }
 
     fun ValueParse() : Expression.Value
@@ -314,21 +259,38 @@ class Parser(val lexer: Lexer) {
     {
         var nextToken = lexer.peek()
 
-        var expression = when(nextToken)
+        when(nextToken)
         {
-            is LexerToken.Number_Literal -> ValueParse()
-            is LexerToken.FunctionIdent -> FunctionCallParse()
-            else -> throw Exception("Invalid Expression");
+            is LexerToken.Number_Literal -> return ValueParse()
+            is LexerToken.FunctionIdent -> return FunctionCallParse()
+            is LexerToken.NameIdent -> return Expression.UseVariable(NameParse())
+
+            is LexerToken.Plus,
+            is LexerToken.Minus,
+            is LexerToken.Mul,
+            is LexerToken.Double_Equals,
+            is LexerToken.And ,
+            is LexerToken.Or,
+            is LexerToken.Not ,
+            is LexerToken.NotEqual ,
+            is LexerToken.Less ,
+            is LexerToken.LessEqual,
+            is LexerToken.Greater ,
+            is LexerToken.GreaterEqual -> return CalulationParse()
+
+            is LexerToken.AssignEquals -> {
+                GetTextToken()
+                return ExpressionParse()
+            }
+
+            else -> throw Exception("Invalid Expression <$nextToken>");
         }
 
-        nextToken = lexer.peek()
 
-        if(nextToken !is LexerToken.Semicolon)
-        {
-            expression = CalulationParse(expression)
-        }
 
-        return expression
+        //var expectedSemicolon = FetchNextExpectedToken<LexerToken.Semicolon>("Semicolon")
+
+       // throw java.lang.Exception("Something went wrong")
     }
 
     fun AssignmentParse() : Statement.AssignValue
@@ -388,27 +350,18 @@ class Parser(val lexer: Lexer) {
     {
         val token = lexer.peek()
 
-        if(token is LexerToken.If)
+        val statement = when(token)
         {
-            return IfParse()
+            is LexerToken.If -> IfParse()
+            is LexerToken.While -> WhileParse()
+            is LexerToken.LCurlyBrace ->  BlockParse()
+            is LexerToken.Return -> AssignmentParse()
+            else -> throw Exception("Statement Parsing failure. Unexpected Token <$token>")
         }
 
-        if(token is LexerToken.While)
-        {
-            return WhileParse()
-        }
+        val semicolon = FetchNextExpectedToken<LexerToken.Semicolon>("Semicolon")
 
-        if(token is LexerToken.LCurlyBrace)
-        {
-            return BlockParse()
-        }
-
-        if(token is LexerToken.Return)
-        {
-            return AssignmentParse()
-        }
-
-        throw Exception("Statement Parsing failure. Unexpected Token <$token>")
+        return statement
     }
 
     fun TypeParse(): Type

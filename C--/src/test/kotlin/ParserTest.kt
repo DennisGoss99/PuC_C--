@@ -20,7 +20,7 @@ class ParserTest
     {
         return Declaration.FunctionDeclare(
             Type.Integer,
-            "main",
+            "Main",
             Body(statementList, localVariables),
             parameters
         )
@@ -45,7 +45,7 @@ class ParserTest
     fun ReturnDirectTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 return 5;
             }
@@ -64,7 +64,7 @@ class ParserTest
     fun ReturnWithAdditionTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 return 5 + 5;
             }
@@ -73,7 +73,7 @@ class ParserTest
         val statementList = listOf<Statement>(
             Statement.AssignValue(
                 Type.Return,
-                Expression.Calculation(
+                Expression.Operation(
                     Operator.Plus,
                     Expression.Value(ConstantValue.ConstInteger(5)),
                     Expression.Value(ConstantValue.ConstInteger(5))
@@ -89,7 +89,7 @@ class ParserTest
     fun ReturnWithDeclarationTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 int §a = 0;
                 
@@ -117,7 +117,7 @@ class ParserTest
     fun ReturnWithLoopTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 int §a = 1;
                 
@@ -136,7 +136,7 @@ class ParserTest
 
         val statementList = listOf<Statement>(
             Statement.While(
-                Expression.Calculation(
+                Expression.Operation(
                     Operator.DoubleEquals,
                     Expression.UseVariable("a"),
                     Expression.Value(ConstantValue.ConstInteger(5))
@@ -145,7 +145,7 @@ class ParserTest
                     listOf<Statement>(
                     Statement.AssignValue(
                         Type.Variable("a"),
-                        Expression.Calculation(
+                        Expression.Operation(
                             Operator.Plus,
                             Expression.UseVariable("a"),
                             Expression.Value(ConstantValue.ConstInteger(5))
@@ -169,7 +169,7 @@ class ParserTest
     fun ReturnWithParametersTest()
     {
         val code = """
-            int main(int §a, int §b)
+            int Main(int §a, int §b)
             {
                 return §a * §b;
             }
@@ -183,7 +183,7 @@ class ParserTest
         val statementList = listOf<Statement>(
             Statement.AssignValue(
                 Type.Return,
-                Expression.Calculation(
+                Expression.Operation(
                     Operator.Multiply,
                     Expression.UseVariable("a"),
                     Expression.UseVariable("b")
@@ -200,7 +200,7 @@ class ParserTest
     fun ReturnWithFuncitonCallTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 return 2 + §A(3,5);
             }
@@ -209,7 +209,7 @@ class ParserTest
         val statementList = listOf<Statement>(
             Statement.AssignValue(
                 Type.Return,
-                Expression.Calculation(
+                Expression.Operation(
                     Operator.Plus,
                     Expression.Value(ConstantValue.ConstInteger(2)),
                     Expression.FunctionCall(
@@ -232,7 +232,7 @@ class ParserTest
     fun ReturnWithIFTest()
     {
         val code = """
-            int main()
+            int Main()
             {
                 int §w = 3;
                 bool §f = §w <= 3;
@@ -248,7 +248,7 @@ class ParserTest
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
             Declaration.VariableDeclaration(Type.Integer, "w", Expression.Value(ConstantValue.ConstInteger(3))),
-            Declaration.VariableDeclaration(Type.Boolean, "f", Expression.Calculation(Operator.LessEqual, Expression.UseVariable("w"), Expression.Value(ConstantValue.ConstInteger(3))))
+            Declaration.VariableDeclaration(Type.Boolean, "f", Expression.Operation(Operator.LessEqual, Expression.UseVariable("w"), Expression.Value(ConstantValue.ConstInteger(3))))
         )
 
         val statementList = listOf<Statement>(
