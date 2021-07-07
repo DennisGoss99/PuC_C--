@@ -109,7 +109,7 @@ class Parser(val lexer: Lexer) {
         while(true)
         {
             val token = lexer.peek()
-            val searchNextExpression = token is LexerToken.RCurlyBrace
+            val searchNextExpression = token is LexerToken.Semicolon || token is LexerToken.RCurlyBrace
 
             if(searchNextExpression)
             {
@@ -133,7 +133,8 @@ class Parser(val lexer: Lexer) {
         return Body(statementList, localVariables)
     }
 
-    fun ParameterParse(): List<Parameter>? {
+    fun ParameterParseAsDeclaration(): List<Parameter>?
+    {
         val parameterList = mutableListOf<Parameter>()
         val expectedLBrace = FetchNextExpectedToken<LexerToken.Lparen>("name")
 
@@ -164,7 +165,7 @@ class Parser(val lexer: Lexer) {
     {
         val type = TypeParse()
         val name = FunctionIdentifyParse()
-        val parameter = ParameterParse()
+        val parameter = ParameterParseAsDeclaration()
         val body = BodyParse()
 
         return Declaration.FunctionDeclare(type, name, body,parameter)
@@ -206,7 +207,7 @@ class Parser(val lexer: Lexer) {
             is LexerToken.LessEqual-> Operator.LessEqual
             is LexerToken.Greater-> Operator.Greater
             is LexerToken.GreaterEqual -> Operator.GreaterEquals
-            else-> throw Exception("Invalid/Unkown Operator.")
+            else-> throw Exception("Invalid/Unkown Operator <$token>.")
         }
     }
 
@@ -240,10 +241,40 @@ class Parser(val lexer: Lexer) {
        throw java.lang.Exception("Unkown Value Type")
     }
 
+    fun ParameterParseAsExpression() : List<Expression>?
+    {
+        val expressionList = mutableListOf<Expression>()
+        val leftBracked = FetchNextExpectedToken<LexerToken.Lparen>("'('")
+
+        while(true)
+        {
+            expressionList.add(ExpressionParse())
+
+            val token = GetTextToken()
+
+            if(token is LexerToken.Rparen)
+            {
+               break
+            }
+
+            if(token !is LexerToken.Comma)
+            {
+                throw Exception("Invalid expression <$token>")
+            }
+        }
+
+        if(expressionList.isEmpty())
+        {
+            return null
+        }
+
+        return expressionList
+    }
+
     fun FunctionCallParse() : Expression.FunctionCall
     {
-        val name = NameParse()
-        val parameter = emptyList<Expression>()
+        val name = FunctionIdentifyParse()
+        val parameter = ParameterParseAsExpression()
 
         return Expression.FunctionCall(name, parameter)
     }
@@ -259,12 +290,26 @@ class Parser(val lexer: Lexer) {
     {
         var nextToken = lexer.peek()
 
-        when(nextToken)
+        var expression = when(nextToken)
         {
-            is LexerToken.Number_Literal -> return ValueParse()
-            is LexerToken.FunctionIdent -> return FunctionCallParse()
-            is LexerToken.NameIdent -> return Expression.UseVariable(NameParse())
+            is LexerToken.Number_Literal -> ValueParse()
+            is LexerToken.FunctionIdent -> FunctionCallParse()
+            is LexerToken.NameIdent ->FunctionCallParse()
+            /*
+            {
+                val name = NameParse()
 
+                if(name[0] == '§')
+                {
+                    Expression.UseVariable(name)
+                }
+                else
+                {
+                    FunctionCallParse()
+                }
+            }*/
+
+            /*
             is LexerToken.Plus,
             is LexerToken.Minus,
             is LexerToken.Mul,
@@ -276,21 +321,31 @@ class Parser(val lexer: Lexer) {
             is LexerToken.Less ,
             is LexerToken.LessEqual,
             is LexerToken.Greater ,
-            is LexerToken.GreaterEqual -> return CalulationParse()
+            is LexerToken.GreaterEqual -> return CalulationParse()*/
 
             is LexerToken.AssignEquals -> {
                 GetTextToken()
-                return ExpressionParse()
+                ExpressionParse()
             }
 
             else -> throw Exception("Invalid Expression <$nextToken>");
         }
 
+        var expectedSemicolon = lexer.peek()
 
 
-        //var expectedSemicolon = FetchNextExpectedToken<LexerToken.Semicolon>("Semicolon")
+        if(
+                expectedSemicolon !is LexerToken.Semicolon &&
+                expectedSemicolon !is LexerToken.Comma &&
+                expectedSemicolon !is LexerToken.Rparen
+        )
+        {
+            // Not yet Finished
 
-       // throw java.lang.Exception("Something went wrong")
+            expression = CalulationParse(expression)
+        }
+
+        return expression
     }
 
     fun AssignmentParse() : Statement.AssignValue

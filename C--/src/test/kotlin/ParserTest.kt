@@ -28,7 +28,9 @@ class ParserTest
 
     fun TestIfTreeIsAsExpected(code : String, declaration: Declaration.FunctionDeclare)
     {
-        //println(declaration)
+        println("-----<Code>-----")
+        println(code)
+        println("----------------")
 
         val lexer = Lexer(code)
         val parser = Parser(lexer)
@@ -202,7 +204,7 @@ class ParserTest
         val code = """
             int Main()
             {
-                return 2 + §A(3,5);
+                return 2 + A(3,5);
             }
         """.trimIndent()
 
@@ -213,7 +215,7 @@ class ParserTest
                     Operator.Plus,
                     Expression.Value(ConstantValue.Integer(2)),
                     Expression.FunctionCall(
-                        "a",
+                        "A",
                         listOf<Expression>(
                             Expression.Value(ConstantValue.Integer(3)),
                             Expression.Value(ConstantValue.Integer(5))
