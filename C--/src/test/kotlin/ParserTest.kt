@@ -52,7 +52,7 @@ class ParserTest
         """.trimIndent()
 
         val statementList = listOf<Statement>(
-            Statement.AssignValue(Type.Return, Expression.Value(ConstantValue.Integer(5)))
+            Statement.AssignValue("return", Expression.Value(ConstantValue.Integer(5)))
         )
 
         val tree = CallMain(statementList)
@@ -72,7 +72,7 @@ class ParserTest
 
         val statementList = listOf<Statement>(
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.Operation(
                     Operator.Plus,
                     Expression.Value(ConstantValue.Integer(5)),
@@ -103,7 +103,7 @@ class ParserTest
 
         val statementList = listOf<Statement>(
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.UseVariable("a")
             )
         )
@@ -144,7 +144,7 @@ class ParserTest
                 Body(
                     listOf<Statement>(
                     Statement.AssignValue(
-                        Type.Variable("a"),
+                        "a",
                         Expression.Operation(
                             Operator.Plus,
                             Expression.UseVariable("a"),
@@ -155,7 +155,7 @@ class ParserTest
                 )
             ),
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.UseVariable("a")
             )
         )
@@ -182,7 +182,7 @@ class ParserTest
 
         val statementList = listOf<Statement>(
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.Operation(
                     Operator.Multiply,
                     Expression.UseVariable("a"),
@@ -208,7 +208,7 @@ class ParserTest
 
         val statementList = listOf<Statement>(
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.Operation(
                     Operator.Plus,
                     Expression.Value(ConstantValue.Integer(2)),
@@ -256,14 +256,14 @@ class ParserTest
                 Expression.UseVariable("f"),
                 Body(listOf<Statement>(
                     Statement.AssignValue(
-                        Type.Return,
+                        "return",
                         Expression.Value(ConstantValue.Integer(1))
                     )
                 )),
                 null
             ),
             Statement.AssignValue(
-                Type.Return,
+                "return",
                 Expression.Value(ConstantValue.Integer(0))
             )
 

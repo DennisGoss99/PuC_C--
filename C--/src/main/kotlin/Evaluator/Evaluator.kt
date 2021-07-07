@@ -18,6 +18,10 @@ class Evaluator {
         }
         val mainFunction = functionDeclarations["Main"] ?: throw Exception("Couldn't find Function 'Main'")
 
+//        val printlnFunction = functionDeclarations["Println"] = Declaration.FunctionDeclare(
+//            Type.
+//        )
+
         return evalFunction(mainFunction,args)
     }
 
@@ -44,14 +48,13 @@ class Evaluator {
         body.functionBody.forEach { statement ->
             when(statement){
                 is Statement.AssignValue ->{
-                    when(statement.value){
-                        is Type.Return -> return evalExpression(statement.expression, environment)
-                        is Type.Variable -> {
-                            if(!environment.containsKey(statement.value.name))
-                                throw Exception("Couldn't find variable '${statement.value.name}'")
-                            environment[statement.value.name] = evalExpression(statement.expression, environment)
+                    when(statement.variableName){
+                        "return" -> return evalExpression(statement.expression, environment)
+                        else -> {
+                            if(!(environment.containsKey(statement.variableName) || globalEnvironment.containsKey(statement.variableName)))
+                                throw Exception("Couldn't find variable '$statement.variableName}'")
+                            environment[statement.variableName] = evalExpression(statement.expression, environment)
                         }
-                        else -> throw Exception("Couldn't assign value to '${statement.value}'")
                     }
                 }
                 is Statement.If -> {

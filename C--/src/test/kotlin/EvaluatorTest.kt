@@ -17,7 +17,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>
                         (
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
+                        Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(5)))
                     )
                 ),
                 null
@@ -41,7 +41,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Return,
+                            "return",
                             Expression.Operation(
                                 Operator.Plus,
                                 Expression.Value(ConstantValue.Integer(5)),
@@ -70,7 +70,7 @@ class EvaluatorTest {
                 "Main",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.UseVariable("§a")))
+                        Statement.AssignValue("return",Expression.UseVariable("§a")))
                 ),
                 null
             )
@@ -93,7 +93,7 @@ class EvaluatorTest {
                 "Main",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.UseVariable("§a"))),
+                        Statement.AssignValue("return",Expression.UseVariable("§a"))),
                     listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
                 ),
                 null
@@ -118,7 +118,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Return,
+                            "return",
                             Expression.Operation(
                                 Operator.Plus,
                                 Expression.UseVariable("§a"),
@@ -149,11 +149,11 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Variable("§a"),
+                            "§a",
                             Expression.Value(ConstantValue.Integer(20))
                         ),
                         Statement.AssignValue(
-                            Type.Return,
+                            "return",
                             Expression.UseVariable("§a")
                         )
                     ),
@@ -183,12 +183,12 @@ class EvaluatorTest {
                             Expression.Value(ConstantValue.Boolean(true)),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(10)))
+                                    Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(10)))
                                 )
                             ),
                             null
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
+                        Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(5)))
                     ),
                 ),
                 null
@@ -205,12 +205,12 @@ class EvaluatorTest {
                             Expression.Value(ConstantValue.Boolean(false)),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(10)))
+                                    Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(10)))
                                 )
                             ),
                             null
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
+                        Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(5)))
                     ),
                 ),
                 null
@@ -235,23 +235,23 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Variable("§cc"),
+                            "§cc",
                             Expression.Operation(Operator.Greater, Expression.Operation(Operator.Multiply,Expression.UseVariable("§a"),Expression.Value(ConstantValue.Integer(5))), Expression.UseVariable("§b"))
                         ),
                         Statement.If(
                             Expression.UseVariable("§cc"),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Boolean(true)))
+                                    Statement.AssignValue("return",Expression.Value(ConstantValue.Boolean(true)))
                                 )
                             ),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Boolean(false)))
+                                    Statement.AssignValue("return",Expression.Value(ConstantValue.Boolean(false)))
                                 )
                             )
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
+                        Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(5)))
                     ),
                     listOf(
                         Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(5))),
@@ -277,7 +277,7 @@ class EvaluatorTest {
                 "A",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5))))
+                        Statement.AssignValue("return",Expression.Value(ConstantValue.Integer(5))))
                 ),
                 null
             ),
@@ -286,7 +286,7 @@ class EvaluatorTest {
                 "Main",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.FunctionCall("A",null)))
+                        Statement.AssignValue("return",Expression.FunctionCall("A",null)))
                 ),
                 null
             )
@@ -308,7 +308,7 @@ class EvaluatorTest {
                 "A",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.UseVariable("§hallo")))
+                        Statement.AssignValue("return",Expression.UseVariable("§hallo")))
                 ),
                 listOf(Parameter("§hallo",Type.Integer))
             ),
@@ -317,7 +317,7 @@ class EvaluatorTest {
                 "Main",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.FunctionCall("A", listOf(Expression.Value(ConstantValue.Integer(5))))))
+                        Statement.AssignValue("return",Expression.FunctionCall("A", listOf(Expression.Value(ConstantValue.Integer(5))))))
                 ),
                 null
             )
@@ -339,7 +339,7 @@ class EvaluatorTest {
                 "A",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,
+                        Statement.AssignValue("return",
                             Expression.Operation(
                             Operator.Multiply,
                             Expression.Value(ConstantValue.Integer(5)),
@@ -355,7 +355,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Return,
+                            "return",
                             Expression.FunctionCall(
                                 "A",
                                 listOf(
@@ -393,11 +393,11 @@ class EvaluatorTest {
                             Expression.Operation(Operator.Less,Expression.UseVariable("§a"),Expression.Value(ConstantValue.Integer(100))),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Variable("§a"),Expression.Operation(Operator.Multiply,Expression.UseVariable("§a"),Expression.UseVariable("§a")))
+                                    Statement.AssignValue("§a",Expression.Operation(Operator.Multiply,Expression.UseVariable("§a"),Expression.UseVariable("§a")))
                                 )
                             )
                         ),
-                        Statement.AssignValue(Type.Return,Expression.UseVariable("§a"))
+                        Statement.AssignValue("return",Expression.UseVariable("§a"))
                     ),
                     listOf(
                         Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(2))),
@@ -430,7 +430,7 @@ class EvaluatorTest {
                             Body(
                                 listOf<Statement>(
                                     Statement.AssignValue(
-                                        Type.Return,
+                                        "return",
                                         Expression.UseVariable("§n")
                                     )
                                 )
@@ -438,7 +438,7 @@ class EvaluatorTest {
                             Body(
                                 listOf<Statement>(
                                     Statement.AssignValue(
-                                        Type.Return,
+                                        "return",
                                         Expression.Operation(
                                             Operator.Plus,
                                             Expression.FunctionCall("F", listOf(
@@ -470,7 +470,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(
-                            Type.Return,
+                            "return",
                             Expression.FunctionCall(
                                 "F",
                                 listOf(Expression.Value(ConstantValue.Integer(9)))
@@ -485,7 +485,45 @@ class EvaluatorTest {
         var evaluator = Evaluator()
 
         assertEquals(Expression.Value(ConstantValue.Integer(34)),evaluator.eval(declarations,null))
+    }
 
+    @Test
+    fun fibonacciLoopTest(){
+
+        val declarations = listOf<Declaration>(
+            Declaration.VariableDeclaration(Type.Integer,"§n",Expression.Value(ConstantValue.Integer(10))),
+            Declaration.VariableDeclaration(Type.Integer,"§f",Expression.Value(ConstantValue.Integer(0))),
+            Declaration.VariableDeclaration(Type.Integer,"§f1",Expression.Value(ConstantValue.Integer(-1))),
+            Declaration.VariableDeclaration(Type.Integer,"§f2",Expression.Value(ConstantValue.Integer(1))),
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.While(
+                            Expression.Operation(Operator.Greater, Expression.UseVariable("§n"), Expression.Value(ConstantValue.Integer(0))),
+                            Body(
+                                listOf<Statement>(
+                                    Statement.AssignValue("§f",Expression.Operation(Operator.Plus,Expression.UseVariable("§f1"),Expression.UseVariable("§f2"))),
+                                    Statement.AssignValue("§f1",Expression.UseVariable("§f2")),
+                                    Statement.AssignValue("§f2",Expression.UseVariable("§f")),
+                                    Statement.AssignValue("§n",Expression.Operation(Operator.Minus,Expression.UseVariable("§n"),Expression.Value(ConstantValue.Integer(1)))),
+                            )
+                            )
+                        ),
+                        Statement.AssignValue(
+                            "return",
+                            Expression.UseVariable("§f")
+                        )
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(34)),evaluator.eval(declarations,null))
     }
 
 }
