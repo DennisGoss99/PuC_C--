@@ -6,27 +6,27 @@ import kotlin.test.assertEquals
 
 class ParserTest
 {
-    fun CallMain(statementList: List<Statement>): Declaration.FunctionDeclare
+    fun CallMain(statementList: List<Statement>): List<Declaration>
     {
         return CallMain(null, null, statementList);
     }
 
-    fun CallMain(localVariable: List<Declaration.VariableDeclaration>?, statementList: List<Statement>): Declaration.FunctionDeclare
+    fun CallMain(localVariable: List<Declaration.VariableDeclaration>?, statementList: List<Statement>): List<Declaration>
     {
         return CallMain(localVariable, null, statementList);
     }
 
-    fun CallMain(localVariables: List<Declaration.VariableDeclaration>?, parameters: List<Parameter>?, statementList: List<Statement>): Declaration.FunctionDeclare
+    fun CallMain(localVariables: List<Declaration.VariableDeclaration>?, parameters: List<Parameter>?, statementList: List<Statement>): List<Declaration>
     {
-        return Declaration.FunctionDeclare(
+        return listOf<Declaration>(Declaration.FunctionDeclare(
             Type.Integer,
             "Main",
             Body(statementList, localVariables),
             parameters
-        )
+        ))
     }
 
-    fun TestIfTreeIsAsExpected(code : String, declaration: Declaration.FunctionDeclare)
+    fun TestIfTreeIsAsExpected(code : String, declaration: List<Declaration>)
     {
         println("-----<Code>-----")
         println(code)
@@ -100,13 +100,13 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.Integer(0)))
+            Declaration.VariableDeclaration(Type.Integer, "§a", Expression.Value(ConstantValue.Integer(0)))
         )
 
         val statementList = listOf<Statement>(
             Statement.AssignValue(
                 "return",
-                Expression.UseVariable("a")
+                Expression.UseVariable("§a")
             )
         )
 
@@ -133,23 +133,23 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.Integer(1)))
+            Declaration.VariableDeclaration(Type.Integer, "§a", Expression.Value(ConstantValue.Integer(1)))
         )
 
         val statementList = listOf<Statement>(
             Statement.While(
                 Expression.Operation(
                     Operator.DoubleEquals,
-                    Expression.UseVariable("a"),
+                    Expression.UseVariable("§a"),
                     Expression.Value(ConstantValue.Integer(5))
                 ),
                 Body(
                     listOf<Statement>(
                     Statement.AssignValue(
-                        "a",
+                        "§a",
                         Expression.Operation(
                             Operator.Plus,
-                            Expression.UseVariable("a"),
+                            Expression.UseVariable("§a"),
                             Expression.Value(ConstantValue.Integer(5))
                         )
                     )
@@ -158,7 +158,7 @@ class ParserTest
             ),
             Statement.AssignValue(
                 "return",
-                Expression.UseVariable("a")
+                Expression.UseVariable("§a")
             )
         )
 
@@ -178,8 +178,8 @@ class ParserTest
         """.trimIndent()
 
         val parameters = listOf<Parameter>(
-            Parameter("a", Type.Integer),
-            Parameter("b", Type.Integer)
+            Parameter("§a", Type.Integer),
+            Parameter("§b", Type.Integer)
         )
 
         val statementList = listOf<Statement>(
@@ -187,8 +187,8 @@ class ParserTest
                 "return",
                 Expression.Operation(
                     Operator.Multiply,
-                    Expression.UseVariable("a"),
-                    Expression.UseVariable("b")
+                    Expression.UseVariable("§a"),
+                    Expression.UseVariable("§b")
                 )
             )
         )
@@ -239,7 +239,7 @@ class ParserTest
                 int §w = 3;
                 bool §f = §w <= 3;
                 
-                if(f)
+                if(§f)
                 {
                     return 1;
                 }
@@ -249,13 +249,13 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "w", Expression.Value(ConstantValue.Integer(3))),
-            Declaration.VariableDeclaration(Type.Boolean, "f", Expression.Operation(Operator.LessEqual, Expression.UseVariable("w"), Expression.Value(ConstantValue.Integer(3))))
+            Declaration.VariableDeclaration(Type.Integer, "§w", Expression.Value(ConstantValue.Integer(3))),
+            Declaration.VariableDeclaration(Type.Boolean, "§f", Expression.Operation(Operator.LessEqual, Expression.UseVariable("§w"), Expression.Value(ConstantValue.Integer(3))))
         )
 
         val statementList = listOf<Statement>(
             Statement.If(
-                Expression.UseVariable("f"),
+                Expression.UseVariable("§f"),
                 Body(listOf<Statement>(
                     Statement.AssignValue(
                         "return",
