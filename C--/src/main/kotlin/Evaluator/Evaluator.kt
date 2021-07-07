@@ -55,7 +55,8 @@ class Evaluator {
                     }
                 }
                 is Statement.If -> {
-                    val condition = evalExpression(statement.conndition, environment).value as? ConstantValue.ConstBoolean ?: throw Exception("If condition must be of type 'bool'")
+                    val condition = evalExpression(statement.condition, environment).value as? ConstantValue.Boolean
+                        ?: throw Exception("If condition must be of type 'bool'")
                     if(condition.value){
                         evalBody(statement.ifBody, environment)?.let { return it }
                     }else{
@@ -63,7 +64,7 @@ class Evaluator {
                     }
                 }
                 is Statement.While -> {
-                    while ((evalExpression(statement.conndition, environment).value as? ConstantValue.ConstBoolean)?.value ?: throw Exception("While condition must be of type 'bool'"))
+                    while ((evalExpression(statement.condition, environment).value as? ConstantValue.Boolean)?.value ?: throw Exception("While condition must be of type 'bool'"))
                     {
                         evalBody(statement.body, environment)?.let { return it }
                     }
@@ -80,7 +81,7 @@ class Evaluator {
             is Expression.UseVariable ->{
                 environment.getOrDefault(expression.variableName,null) ?: globalEnvironment.getOrDefault(expression.variableName,null) ?: throw Exception("Variable couldn't be found ${expression.variableName}")
             }
-            is Expression.Calculation -> {
+            is Expression.Operation -> {
                 return when(expression.operator){
 
                     Operator.DoubleEquals -> equalsValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x==y}
@@ -110,25 +111,25 @@ class Evaluator {
     }
 
     private fun evalBinaryNumber(v1: Expression.Value, v2: Expression.Value, f: (Int, Int) -> Int): Expression.Value {
-        val v1n = v1.value as? ConstantValue.ConstInteger ?: throw Exception("Can't use a binary operation on $v1, it's not a number")
-        val v2n = v2.value as? ConstantValue.ConstInteger ?: throw Exception("Can't use a binary operation on $v2, it's not a number")
-        return Expression.Value( ConstantValue.ConstInteger(f(v1n.value, v2n.value)))
+        val v1n = v1.value as? ConstantValue.Integer ?: throw Exception("Can't use a binary operation on $v1, it's not a number")
+        val v2n = v2.value as? ConstantValue.Integer ?: throw Exception("Can't use a binary operation on $v2, it's not a number")
+        return Expression.Value( ConstantValue.Integer(f(v1n.value, v2n.value)))
     }
 
     private fun equalsValueNumber(v1: Expression.Value, v2: Expression.Value, f: (Int, Int) -> Boolean): Expression.Value {
-        val v1n = v1.value as? ConstantValue.ConstInteger ?: throw Exception("Can't use a binary operation on $v1, it's not a number")
-        val v2n = v2.value as? ConstantValue.ConstInteger ?: throw Exception("Can't use a binary operation on $v2, it's not a number")
-        return  Expression.Value( ConstantValue.ConstBoolean(f(v1n.value, v2n.value)))
+        val v1n = v1.value as? ConstantValue.Integer ?: throw Exception("Can't use a binary operation on $v1, it's not a number")
+        val v2n = v2.value as? ConstantValue.Integer ?: throw Exception("Can't use a binary operation on $v2, it's not a number")
+        return  Expression.Value( ConstantValue.Boolean(f(v1n.value, v2n.value)))
     }
 
     private fun evalBinaryBoolean(v1: Expression.Value, v2: Expression.Value, f: (Boolean, Boolean) -> Boolean): Expression.Value {
-        val v1n = v1.value as? ConstantValue.ConstBoolean ?: throw Exception("Can't use a binary operation on $v1, it's not a boolean")
-        val v2n = v2.value as? ConstantValue.ConstBoolean ?: throw Exception("Can't use a binary operation on $v2, it's not a boolean")
-        return Expression.Value( ConstantValue.ConstBoolean(f(v1n.value, v2n.value)))
+        val v1n = v1.value as? ConstantValue.Boolean ?: throw Exception("Can't use a binary operation on $v1, it's not a boolean")
+        val v2n = v2.value as? ConstantValue.Boolean ?: throw Exception("Can't use a binary operation on $v2, it's not a boolean")
+        return Expression.Value( ConstantValue.Boolean(f(v1n.value, v2n.value)))
     }
 
     private fun <T> equalsValue(v1: T, v2: T, f: (T, T) -> Boolean): Expression.Value {
-        return  Expression.Value( ConstantValue.ConstBoolean(f(v1, v2)))
+        return  Expression.Value( ConstantValue.Boolean(f(v1, v2)))
     }
 
 }

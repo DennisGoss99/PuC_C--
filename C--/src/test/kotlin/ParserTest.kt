@@ -52,7 +52,7 @@ class ParserTest
         """.trimIndent()
 
         val statementList = listOf<Statement>(
-            Statement.AssignValue(Type.Return, Expression.Value(ConstantValue.ConstInteger(5)))
+            Statement.AssignValue(Type.Return, Expression.Value(ConstantValue.Integer(5)))
         )
 
         val tree = CallMain(statementList)
@@ -75,8 +75,8 @@ class ParserTest
                 Type.Return,
                 Expression.Operation(
                     Operator.Plus,
-                    Expression.Value(ConstantValue.ConstInteger(5)),
-                    Expression.Value(ConstantValue.ConstInteger(5))
+                    Expression.Value(ConstantValue.Integer(5)),
+                    Expression.Value(ConstantValue.Integer(5))
                 ))
         )
 
@@ -98,7 +98,7 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.ConstInteger(0)))
+            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.Integer(0)))
         )
 
         val statementList = listOf<Statement>(
@@ -131,7 +131,7 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.ConstInteger(1)))
+            Declaration.VariableDeclaration(Type.Integer, "a", Expression.Value(ConstantValue.Integer(1)))
         )
 
         val statementList = listOf<Statement>(
@@ -139,7 +139,7 @@ class ParserTest
                 Expression.Operation(
                     Operator.DoubleEquals,
                     Expression.UseVariable("a"),
-                    Expression.Value(ConstantValue.ConstInteger(5))
+                    Expression.Value(ConstantValue.Integer(5))
                 ),
                 Body(
                     listOf<Statement>(
@@ -148,7 +148,7 @@ class ParserTest
                         Expression.Operation(
                             Operator.Plus,
                             Expression.UseVariable("a"),
-                            Expression.Value(ConstantValue.ConstInteger(5))
+                            Expression.Value(ConstantValue.Integer(5))
                         )
                     )
                  )
@@ -211,12 +211,12 @@ class ParserTest
                 Type.Return,
                 Expression.Operation(
                     Operator.Plus,
-                    Expression.Value(ConstantValue.ConstInteger(2)),
+                    Expression.Value(ConstantValue.Integer(2)),
                     Expression.FunctionCall(
                         "a",
                         listOf<Expression>(
-                            Expression.Value(ConstantValue.ConstInteger(3)),
-                            Expression.Value(ConstantValue.ConstInteger(5))
+                            Expression.Value(ConstantValue.Integer(3)),
+                            Expression.Value(ConstantValue.Integer(5))
                         )
                     )
                 )
@@ -247,8 +247,8 @@ class ParserTest
         """.trimIndent()
 
         val localVariables = listOf<Declaration.VariableDeclaration>(
-            Declaration.VariableDeclaration(Type.Integer, "w", Expression.Value(ConstantValue.ConstInteger(3))),
-            Declaration.VariableDeclaration(Type.Boolean, "f", Expression.Operation(Operator.LessEqual, Expression.UseVariable("w"), Expression.Value(ConstantValue.ConstInteger(3))))
+            Declaration.VariableDeclaration(Type.Integer, "w", Expression.Value(ConstantValue.Integer(3))),
+            Declaration.VariableDeclaration(Type.Boolean, "f", Expression.Operation(Operator.LessEqual, Expression.UseVariable("w"), Expression.Value(ConstantValue.Integer(3))))
         )
 
         val statementList = listOf<Statement>(
@@ -257,14 +257,14 @@ class ParserTest
                 Body(listOf<Statement>(
                     Statement.AssignValue(
                         Type.Return,
-                        Expression.Value(ConstantValue.ConstInteger(1))
+                        Expression.Value(ConstantValue.Integer(1))
                     )
                 )),
                 null
             ),
             Statement.AssignValue(
                 Type.Return,
-                Expression.Value(ConstantValue.ConstInteger(0))
+                Expression.Value(ConstantValue.Integer(0))
             )
 
         )

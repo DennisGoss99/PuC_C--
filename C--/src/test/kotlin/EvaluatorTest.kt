@@ -17,7 +17,7 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>
                         (
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(5)))
+                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
                     )
                 ),
                 null
@@ -26,7 +26,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(5)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(5)),evaluator.eval(declarations,null))
 
     }
 
@@ -42,10 +42,10 @@ class EvaluatorTest {
                     listOf<Statement>(
                         Statement.AssignValue(
                             Type.Return,
-                            Expression.Calculation(
+                            Expression.Operation(
                                 Operator.Plus,
-                                Expression.Value(ConstantValue.ConstInteger(5)),
-                                Expression.Value(ConstantValue.ConstInteger(5))
+                                Expression.Value(ConstantValue.Integer(5)),
+                                Expression.Value(ConstantValue.Integer(5))
                                 )
                         )
                     )
@@ -56,7 +56,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(10)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(10)),evaluator.eval(declarations,null))
 
     }
 
@@ -64,7 +64,7 @@ class EvaluatorTest {
     fun globalVariableTest(){
 
         val declarations = listOf<Declaration>(
-            Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(5))),
+            Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(5))),
             Declaration.FunctionDeclare(
                 Type.Integer,
                 "Main",
@@ -79,7 +79,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(5)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(5)),evaluator.eval(declarations,null))
 
     }
 
@@ -87,14 +87,14 @@ class EvaluatorTest {
     fun sameVariableNameTest(){
 
         val declarations = listOf<Declaration>(
-            Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(5))),
+            Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(5))),
             Declaration.FunctionDeclare(
                 Type.Integer,
                 "Main",
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(Type.Return,Expression.UseVariable("§a"))),
-                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(15))))
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
                 ),
                 null
             )
@@ -103,7 +103,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(15)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(15)),evaluator.eval(declarations,null))
 
     }
 
@@ -111,7 +111,7 @@ class EvaluatorTest {
     fun variableAdditionTest(){
 
         val declarations = listOf<Declaration>(
-            Declaration.VariableDeclaration(Type.Integer,"§b",Expression.Value(ConstantValue.ConstInteger(5))),
+            Declaration.VariableDeclaration(Type.Integer,"§b",Expression.Value(ConstantValue.Integer(5))),
             Declaration.FunctionDeclare(
                 Type.Integer,
                 "Main",
@@ -119,14 +119,14 @@ class EvaluatorTest {
                     listOf<Statement>(
                         Statement.AssignValue(
                             Type.Return,
-                            Expression.Calculation(
+                            Expression.Operation(
                                 Operator.Plus,
                                 Expression.UseVariable("§a"),
                                 Expression.UseVariable("§b")
                             )
                         )
                     ),
-                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(15))))
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
                 ),
                 null
             )
@@ -135,7 +135,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(20)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(20)),evaluator.eval(declarations,null))
 
     }
 
@@ -150,14 +150,14 @@ class EvaluatorTest {
                     listOf<Statement>(
                         Statement.AssignValue(
                             Type.Variable("§a"),
-                            Expression.Value(ConstantValue.ConstInteger(20))
+                            Expression.Value(ConstantValue.Integer(20))
                         ),
                         Statement.AssignValue(
                             Type.Return,
                             Expression.UseVariable("§a")
                         )
                     ),
-                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(15))))
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
                 ),
                 null
             )
@@ -166,7 +166,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(20)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(20)),evaluator.eval(declarations,null))
 
     }
 
@@ -180,15 +180,15 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.If(
-                            Expression.Value(ConstantValue.ConstBoolean(true)),
+                            Expression.Value(ConstantValue.Boolean(true)),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(10)))
+                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(10)))
                                 )
                             ),
                             null
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(5)))
+                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
                     ),
                 ),
                 null
@@ -202,15 +202,15 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.If(
-                            Expression.Value(ConstantValue.ConstBoolean(false)),
+                            Expression.Value(ConstantValue.Boolean(false)),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(10)))
+                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(10)))
                                 )
                             ),
                             null
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(5)))
+                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
                     ),
                 ),
                 null
@@ -219,10 +219,10 @@ class EvaluatorTest {
 
 
         var evaluator = Evaluator()
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(10)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(10)),evaluator.eval(declarations,null))
 
         var evaluator2 = Evaluator()
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(5)),evaluator2.eval(declarations2,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(5)),evaluator2.eval(declarations2,null))
     }
 
     @Test
@@ -236,27 +236,27 @@ class EvaluatorTest {
                     listOf<Statement>(
                         Statement.AssignValue(
                             Type.Variable("§cc"),
-                            Expression.Calculation(Operator.Greater, Expression.Calculation(Operator.Multiply,Expression.UseVariable("§a"),Expression.Value(ConstantValue.ConstInteger(5))), Expression.UseVariable("§b"))
+                            Expression.Operation(Operator.Greater, Expression.Operation(Operator.Multiply,Expression.UseVariable("§a"),Expression.Value(ConstantValue.Integer(5))), Expression.UseVariable("§b"))
                         ),
                         Statement.If(
                             Expression.UseVariable("§cc"),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstBoolean(true)))
+                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Boolean(true)))
                                 )
                             ),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstBoolean(false)))
+                                    Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Boolean(false)))
                                 )
                             )
                         ),
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(5)))
+                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5)))
                     ),
                     listOf(
-                        Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(5))),
-                        Declaration.VariableDeclaration(Type.Integer,"§b",Expression.Value(ConstantValue.ConstInteger(24))),
-                        Declaration.VariableDeclaration(Type.Integer,"§cc",Expression.Value(ConstantValue.ConstBoolean(false))),
+                        Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(5))),
+                        Declaration.VariableDeclaration(Type.Integer,"§b",Expression.Value(ConstantValue.Integer(24))),
+                        Declaration.VariableDeclaration(Type.Integer,"§cc",Expression.Value(ConstantValue.Boolean(false))),
                     )
                 ),
                 null
@@ -264,7 +264,7 @@ class EvaluatorTest {
         )
 
         var evaluator = Evaluator()
-        assertEquals(Expression.Value(ConstantValue.ConstBoolean(true)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Boolean(true)),evaluator.eval(declarations,null))
 
     }
 
@@ -277,7 +277,7 @@ class EvaluatorTest {
                 "A",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.ConstInteger(5))))
+                        Statement.AssignValue(Type.Return,Expression.Value(ConstantValue.Integer(5))))
                 ),
                 null
             ),
@@ -295,7 +295,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(5)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(5)),evaluator.eval(declarations,null))
 
     }
 
@@ -317,7 +317,7 @@ class EvaluatorTest {
                 "Main",
                 Body(
                     listOf<Statement>(
-                        Statement.AssignValue(Type.Return,Expression.FunctionCall("A", listOf(Expression.Value(ConstantValue.ConstInteger(5))))))
+                        Statement.AssignValue(Type.Return,Expression.FunctionCall("A", listOf(Expression.Value(ConstantValue.Integer(5))))))
                 ),
                 null
             )
@@ -326,7 +326,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(5)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(5)),evaluator.eval(declarations,null))
 
     }
 
@@ -340,9 +340,9 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.AssignValue(Type.Return,
-                            Expression.Calculation(
+                            Expression.Operation(
                             Operator.Multiply,
-                            Expression.Value(ConstantValue.ConstInteger(5)),
+                            Expression.Value(ConstantValue.Integer(5)),
                             Expression.UseVariable("§hallo"))
                     )
                     )
@@ -361,7 +361,7 @@ class EvaluatorTest {
                                 listOf(
                                     Expression.FunctionCall(
                                         "A",
-                                        listOf(Expression.Value(ConstantValue.ConstInteger(
+                                        listOf(Expression.Value(ConstantValue.Integer(
                                             5
                                         )))
                                     )
@@ -376,7 +376,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(125)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(125)),evaluator.eval(declarations,null))
 
     }
 
@@ -390,17 +390,17 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.While(
-                            Expression.Calculation(Operator.Less,Expression.UseVariable("§a"),Expression.Value(ConstantValue.ConstInteger(100))),
+                            Expression.Operation(Operator.Less,Expression.UseVariable("§a"),Expression.Value(ConstantValue.Integer(100))),
                             Body(
                                 listOf<Statement>(
-                                    Statement.AssignValue(Type.Variable("§a"),Expression.Calculation(Operator.Multiply,Expression.UseVariable("§a"),Expression.UseVariable("§a")))
+                                    Statement.AssignValue(Type.Variable("§a"),Expression.Operation(Operator.Multiply,Expression.UseVariable("§a"),Expression.UseVariable("§a")))
                                 )
                             )
                         ),
                         Statement.AssignValue(Type.Return,Expression.UseVariable("§a"))
                     ),
                     listOf(
-                        Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.ConstInteger(2))),
+                        Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(2))),
                     )
                 ),
                 null
@@ -408,7 +408,7 @@ class EvaluatorTest {
         )
 
         var evaluator = Evaluator()
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(256)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(256)),evaluator.eval(declarations,null))
 
     }
 
@@ -422,10 +422,10 @@ class EvaluatorTest {
                 Body(
                     listOf<Statement>(
                         Statement.If(
-                            Expression.Calculation(
+                            Expression.Operation(
                                 Operator.Or,
-                                Expression.Calculation(Operator.DoubleEquals, Expression.UseVariable("§n"),Expression.Value(ConstantValue.ConstInteger(0))),
-                                Expression.Calculation(Operator.DoubleEquals, Expression.UseVariable("§n"),Expression.Value(ConstantValue.ConstInteger(1))),
+                                Expression.Operation(Operator.DoubleEquals, Expression.UseVariable("§n"),Expression.Value(ConstantValue.Integer(0))),
+                                Expression.Operation(Operator.DoubleEquals, Expression.UseVariable("§n"),Expression.Value(ConstantValue.Integer(1))),
                             ),
                             Body(
                                 listOf<Statement>(
@@ -439,20 +439,20 @@ class EvaluatorTest {
                                 listOf<Statement>(
                                     Statement.AssignValue(
                                         Type.Return,
-                                        Expression.Calculation(
+                                        Expression.Operation(
                                             Operator.Plus,
                                             Expression.FunctionCall("F", listOf(
-                                                Expression.Calculation(
+                                                Expression.Operation(
                                                     Operator.Minus,
                                                     Expression.UseVariable("§n"),
-                                                    Expression.Value(ConstantValue.ConstInteger(1))
+                                                    Expression.Value(ConstantValue.Integer(1))
                                                 )
                                             )),
                                             Expression.FunctionCall("F", listOf(
-                                                Expression.Calculation(
+                                                Expression.Operation(
                                                     Operator.Minus,
                                                     Expression.UseVariable("§n"),
-                                                    Expression.Value(ConstantValue.ConstInteger(2))
+                                                    Expression.Value(ConstantValue.Integer(2))
                                                 )
                                             ))
                                         )
@@ -473,7 +473,7 @@ class EvaluatorTest {
                             Type.Return,
                             Expression.FunctionCall(
                                 "F",
-                                listOf(Expression.Value(ConstantValue.ConstInteger(9)))
+                                listOf(Expression.Value(ConstantValue.Integer(9)))
                             )
                         )
                     )
@@ -484,7 +484,7 @@ class EvaluatorTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(Expression.Value(ConstantValue.ConstInteger(34)),evaluator.eval(declarations,null))
+        assertEquals(Expression.Value(ConstantValue.Integer(34)),evaluator.eval(declarations,null))
 
     }
 

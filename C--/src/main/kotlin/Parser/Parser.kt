@@ -234,7 +234,7 @@ class Parser(val lexer: Lexer) {
 
         if(numberLiteral.n is Int)
         {
-            return Expression.Value(ConstantValue.ConstInteger(numberLiteral.n, Type.Integer))
+            return Expression.Value(ConstantValue.Integer(numberLiteral.n, Type.Integer))
         }
 
        throw java.lang.Exception("Unkown Value Type")
