@@ -158,7 +158,7 @@ class DeepTest {
         val code = """
             
             int A(int §a){
-                return a+5;
+                return §a+5;
             }
             
             int Main()
@@ -180,7 +180,7 @@ class DeepTest {
         val code = """
             
             int A(int §a){
-                return a+5;
+                return §a+5;
             }
             
             int Main()
@@ -220,7 +220,7 @@ class DeepTest {
         val code = """
             
             int A(int §a){
-                return a+5;
+                return §a+5;
             }
             
             int Main(int §b)
