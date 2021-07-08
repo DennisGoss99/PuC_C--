@@ -1,5 +1,6 @@
 package Lexer
 
+import Lexer.Exceptions.*
 import PeekableIterator
 
 class Lexer(input: String) {
@@ -41,21 +42,21 @@ class Lexer(input: String) {
                     iterator.next()
                     LexerToken.Equals
                 }
-                else -> throw Exception("Unexpected char: '$c' after char ':'")
+                else -> throw LexerUnexpectedCharException(c,':')
             }
             '&' -> when (iterator.peek()) {
                 '&' -> {
                     iterator.next()
                     LexerToken.And
                 }
-                else -> throw Exception("Unexpected char: '$c' after char '&'")
+                else -> throw LexerUnexpectedCharException(c,'&')
             }
             '|' -> when (iterator.peek()) {
                 '|' -> {
                     iterator.next()
                     LexerToken.Or
                 }
-                else -> throw Exception("Unexpected char: '$c' after char '|'")
+                else -> throw LexerUnexpectedCharException(c,'|')
             }
             '!' -> when (iterator.peek()) {
                 '=' -> {
@@ -82,7 +83,7 @@ class Lexer(input: String) {
             '§' -> if (iterator.peek().isJavaIdentifierStart()) {
                 LexerToken.NameIdent(identBase(iterator.next()))
             }else
-                throw Exception("Unexpected char: '$c' after char '$'")
+                throw LexerUnexpectedCharException(c,'§')
 
 
             '\'' -> getChar()
@@ -90,7 +91,7 @@ class Lexer(input: String) {
             else -> when {
                 c.isJavaIdentifierStart() -> ident(c)
                 c.isDigit() -> number(c)
-                else -> throw Exception("Unexpected char: '$c'")
+                else -> throw LexerUnexpectedCharException(c)
             }
         }
 
@@ -142,12 +143,12 @@ class Lexer(input: String) {
     private fun getChar(): LexerToken {
 
         return when(val c = iterator.peek()){
-            '\'' -> throw Exception("Char can't be empty")
+            '\'' -> throw LexerConstCharException("Char can't be empty")
             else -> {
 
                 val c = iterator.next()
                 if(iterator.next() != '\'')
-                    throw Exception("Char can only be a single char")
+                    throw LexerConstCharException("Char can only be a single char")
 
                 return LexerToken.Char_Literal(c);
             }
@@ -167,7 +168,7 @@ class Lexer(input: String) {
                 }
 
                 if(!iterator.hasNext())
-                    throw Exception("Missing closing '\"' char")
+                    throw LexerConstStringException("Missing closing '\"' char")
 
                 iterator.next()
                 return LexerToken.String_Literal(result);
@@ -204,7 +205,7 @@ class Lexer(input: String) {
                 consumeWhitespace()
                 consumeComments()
             }
-            else -> throw Exception("Unexpected char: '$c'")
+            else -> throw LexerUnexpectedCharException(c)
         }
 
     }
