@@ -3,8 +3,7 @@ import Parser.ParserToken.*
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class EvaluatorTest {
-
+class EvaluatorTest{
 
     @Test
     fun simpleMainTest(){
@@ -381,6 +380,40 @@ class EvaluatorTest {
     }
 
     @Test
+    fun parameterProcedureTest(){
+
+        val declarations = listOf<Declaration>(
+            Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(5))),
+            Declaration.FunctionDeclare(
+                Type.Void,
+                "A",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue("§a",Expression.Value(ConstantValue.Integer(10))))
+                ),
+                null
+            ),
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.ProcedureCall("A",null),
+                        Statement.AssignValue("return",Expression.UseVariable("§a"))
+                    )
+                ),
+                null
+            )
+        )
+
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(10)),evaluator.eval(declarations,null))
+
+    }
+
+    @Test
     fun whileTest(){
 
         val declarations = listOf<Declaration>(
@@ -413,7 +446,7 @@ class EvaluatorTest {
     }
 
     @Test
-    fun FibonacciFunctionTest(){
+    fun fibonacciFunctionTest(){
 
         val declarations = listOf<Declaration>(
             Declaration.FunctionDeclare(
@@ -613,5 +646,34 @@ class EvaluatorTest {
 
     }
 
+    @Test
+    fun stringTest(){
+
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare
+                (
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.Operation(
+                                Operator.Plus,
+                                Expression.Value(ConstantValue.String("TEST:")),
+                                Expression.Value(ConstantValue.String("OK"))
+                            )
+                        )
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.String("TEST:OK")),evaluator.eval(declarations,null))
+
+    }
 
 }

@@ -9,11 +9,7 @@ sealed class Statement // Grün
 
     data class AssignValue(val variableName : String, val expression: Expression) : Statement()
 
-    data class FunctionNoReturnDeclare(
-        val functionName: String,
-        val body: Body,
-        val parameters : List<Parameter>?
-    ) : Statement()
+    data class ProcedureCall(val procedureName : String, val parameterList : List<Expression>? ) : Statement()
 
     data class If(val condition : Expression, val ifBody : Body, val elseBody : Body?) : Statement()
     data class While(val condition : Expression, val body : Body) : Statement()

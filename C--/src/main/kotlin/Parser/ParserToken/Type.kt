@@ -13,4 +13,5 @@ sealed class Type
     object Float : Type()
     object Double : Type()
     object String : Type()
+    object Void : Type()
 }

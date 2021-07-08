@@ -18,10 +18,6 @@ class Evaluator {
         }
         val mainFunction = functionDeclarations["Main"] ?: throw Exception("Couldn't find Function 'Main'")
 
-//        val printlnFunction = functionDeclarations["Println"] = Declaration.FunctionDeclare(
-//            Type.
-//        )
-
         return evalFunction(mainFunction,args)
     }
 
@@ -33,8 +29,18 @@ class Evaluator {
         val localEnvironment = HashMap<String, Expression.Value>()
         function.parameters?.zip(parameter.orEmpty()){ fp, p -> fp.name to p }?.associateTo(localEnvironment){it.first to it.second} ?: HashMap<String, Expression.Value>()
 
-
         return evalBody(function.body, localEnvironment) ?: throw Exception("Couldn't find a return statement")
+    }
+
+    private fun evalProcedure(procedure : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) {
+
+        if(procedure.parameters?.size != parameter?.size)
+            throw Exception("procedure call '${procedure.functionName}(${procedure.parameters})' has to many or to little parameter")
+
+        val localEnvironment = HashMap<String, Expression.Value>()
+        procedure.parameters?.zip(parameter.orEmpty()){ fp, p -> fp.name to p }?.associateTo(localEnvironment){it.first to it.second} ?: HashMap<String, Expression.Value>()
+
+        evalBody(procedure.body, localEnvironment)
     }
 
     private fun evalBody(body: Body, environment: HashMap<String, Expression.Value>) : Expression.Value? {
@@ -51,9 +57,11 @@ class Evaluator {
                     when(statement.variableName){
                         "return" -> return evalExpression(statement.expression, environment)
                         else -> {
-                            if(!(environment.containsKey(statement.variableName) || globalEnvironment.containsKey(statement.variableName)))
-                                throw Exception("Couldn't find variable '$statement.variableName}'")
-                            environment[statement.variableName] = evalExpression(statement.expression, environment)
+                             when {
+                                environment.containsKey(statement.variableName) -> environment[statement.variableName] = evalExpression(statement.expression, environment)
+                                globalEnvironment.containsKey(statement.variableName) -> globalEnvironment[statement.variableName] = evalExpression(statement.expression, environment)
+                                else -> throw Exception("Couldn't find variable '$statement.variableName}'")
+                            }
                         }
                     }
                 }
@@ -72,6 +80,17 @@ class Evaluator {
                         evalBody(statement.body, environment)?.let { return it }
                     }
                 }
+                is Statement.ProcedureCall ->{
+                    when(statement.procedureName){
+                        "Println" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> println(p.value.getValueAsString())}
+                        "Print" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> print(p.value.getValueAsString())}
+                        else -> {
+                            val procedure = functionDeclarations[statement.procedureName] ?: throw Exception("Couldn't find procedure '${statement.procedureName}'")
+                            evalProcedure(procedure, statement.parameterList?.map { evalExpression(it,environment) })
+                        }
+                    }
+                }
+                is Statement.Block -> throw NotImplementedError()
 
             }
         }
@@ -95,7 +114,7 @@ class Evaluator {
                 else
                     return when(expression.operator){
                         Operator.DoubleEquals -> equalsValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x==y}
-                        Operator.Plus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x+y}
+                        Operator.Plus -> addValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment))
                         Operator.Minus -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x-y}
                         Operator.Multiply -> evalBinaryNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x*y}
                         Operator.And -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x&&y}
@@ -111,13 +130,41 @@ class Evaluator {
                     }
             }
             is Expression.FunctionCall ->{
-                val function = functionDeclarations.get(expression.functionName) ?: throw Exception("Couldn't find function '${expression.functionName}'")
-                evalFunction(function, expression.parameterList?.map { evalExpression(it,environment) })
+                return when(expression.functionName){
+                    "ToString" -> toStringImplementation(expression.parameterList?.map { evalExpression(it,environment) } )
+                    else -> {
+                        val function = functionDeclarations.get(expression.functionName) ?: throw Exception("Couldn't find function '${expression.functionName}'")
+                        return evalFunction(function, expression.parameterList?.map { evalExpression(it,environment) })
+                    }
+                }
             }
             else -> throw Exception("Unknown Expression '$expression'")
         }
 
 
+    }
+
+    private fun toStringImplementation(parameterList: List<Expression>?): Expression.Value{
+        parameterList ?: throw Exception("Function ToString need one parameter")
+        if(parameterList.size > 1)
+            throw Exception("Function ToString only accepts one Parameter")
+
+        val value = parameterList.first() as? Expression.Value ?: throw Exception("Can't ToString Expression: ${parameterList.first()}")
+        return Expression.Value(ConstantValue.String(value.value.getValueAsString()))
+    }
+
+    private fun addValue(v1: Expression.Value, v2: Expression.Value): Expression.Value {
+        return when(val v1n = v1.value){
+            is ConstantValue.Integer -> {
+                val v2n = v2.value as? ConstantValue.Integer ?: throw Exception("Can't add Type '${v2.value::class} to Integer'")
+                Expression.Value(ConstantValue.Integer(v1n.value + v2n.value))
+            }
+            is ConstantValue.String -> {
+                val v2n = v2.value as? ConstantValue.String ?: throw Exception("Can't add Type '${v2.value::class} to String'")
+                Expression.Value(ConstantValue.String(v1n.value + v2n.value))
+            }
+            else -> throw Exception("Can't use add operation on [${v1.value} + ${v2.value}]")
+        }
     }
 
     private fun evalBinaryNumber(v1: Expression.Value, v2: Expression.Value, f: (Int, Int) -> Int): Expression.Value {
@@ -141,5 +188,6 @@ class Evaluator {
     private fun <T> equalsValue(v1: T, v2: T, f: (T, T) -> Boolean): Expression.Value {
         return  Expression.Value( ConstantValue.Boolean(f(v1, v2)))
     }
+
 
 }
