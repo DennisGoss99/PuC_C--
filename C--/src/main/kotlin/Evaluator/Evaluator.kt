@@ -7,7 +7,7 @@ class Evaluator {
     private val functionDeclarations = HashMap<String, Declaration.FunctionDeclare>()
     private val globalEnvironment = HashMap<String, Expression.Value>()
 
-    fun eval( declarations: List<Declaration>, args : List<Expression.Value>?) : Expression.Value {
+    fun eval( declarations: List<Declaration>, args : List<Expression.Value>? = null) : Expression.Value {
 
         declarations.forEach { d ->
             when(d){
@@ -25,7 +25,7 @@ class Evaluator {
         return evalFunction(mainFunction,args)
     }
 
-    fun evalFunction(function : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) : Expression.Value {
+    private fun evalFunction(function : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) : Expression.Value {
 
         if(function.parameters?.size != parameter?.size)
             throw Exception("function call '${function.functionName}(${function.parameters})' has to many or to little parameter")
@@ -101,7 +101,7 @@ class Evaluator {
                         Operator.And -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x&&y}
                         Operator.Or -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x||y}
 
-                        Operator.NotEqual -> evalBinaryBoolean(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x!=y}
+                        Operator.NotEqual -> equalsValue(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x!=y}
                         Operator.Less -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<y}
                         Operator.LessEqual -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<=y}
                         Operator.Greater -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>y}

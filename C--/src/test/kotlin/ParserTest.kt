@@ -123,9 +123,9 @@ class ParserTest
             {
                 int §a = 1;
                 
-                while(§a == 5)
+                while(§a == 14)
                 {
-                    §a = §a + 5;
+                    §a = §a + 1;
                 }
                 
                 return §a;
@@ -141,7 +141,7 @@ class ParserTest
                 Expression.Operation(
                     Operator.DoubleEquals,
                     Expression.UseVariable("§a"),
-                    Expression.Value(ConstantValue.Integer(5))
+                    Expression.Value(ConstantValue.Integer(14))
                 ),
                 Body(
                     listOf<Statement>(
@@ -150,7 +150,7 @@ class ParserTest
                         Expression.Operation(
                             Operator.Plus,
                             Expression.UseVariable("§a"),
-                            Expression.Value(ConstantValue.Integer(5))
+                            Expression.Value(ConstantValue.Integer(1))
                         )
                     )
                  )

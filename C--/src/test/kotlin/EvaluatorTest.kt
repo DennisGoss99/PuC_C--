@@ -526,4 +526,92 @@ class EvaluatorTest {
         assertEquals(Expression.Value(ConstantValue.Integer(34)),evaluator.eval(declarations,null))
     }
 
+    @Test
+    fun mathMainTest(){
+
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare
+                (
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.Operation(
+                                Operator.Minus,
+                                Expression.Operation(
+                                    Operator.Multiply,
+                                    Expression.Value(ConstantValue.Integer(4)),
+                                    Expression.Operation(
+                                        Operator.Plus,
+                                        Expression.Operation(
+                                            Operator.Multiply,
+                                            Expression.Value(ConstantValue.Integer(3)),
+                                            Expression.Value(ConstantValue.Integer(4))
+                                        ),
+                                        Expression.Value(ConstantValue.Integer(4))
+                                    )
+                                ),
+                                Expression.Operation(
+                                    Operator.Minus,
+                                    Expression.Operation(
+                                        Operator.Multiply,
+                                        Expression.Value(ConstantValue.Integer(4)),
+                                        Expression.Value(ConstantValue.Integer(5))
+                                    ),
+                                    Expression.Value(ConstantValue.Integer(20))
+                                )
+                            )
+                        )
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(64)),evaluator.eval(declarations,null))
+    }
+
+    @Test
+    fun boolTest(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare
+                (
+                Type.Boolean,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.Operation(
+                                Operator.Or,
+                                Expression.Operation(
+                                    Operator.Not,
+                                    Expression.Operation(
+                                        Operator.And,
+                                        Expression.Value(ConstantValue.Boolean(true)),
+                                        Expression.Value(ConstantValue.Boolean(false))
+                                    )
+                                    ,
+                                    null
+                                ),
+                                Expression.Value(ConstantValue.Boolean(false))
+                            )
+                        )
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Boolean(true)),evaluator.eval(declarations,null))
+
+    }
+
+
 }
