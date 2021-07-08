@@ -278,6 +278,36 @@ class DeepTest {
         val code = """
             
             int F(int §n){
+                if(§n == 1){
+                    return 0;
+                }else{
+                    if(§n == 0){
+                        return 0;
+                    }else{
+                        return F(§n - 1) + F(§n - 2);
+                    }                   
+                }
+            }
+            
+            int Main(int §b)
+            {
+                return F(§b);
+            }
+        """.trimIndent()
+
+        val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+        var evaluator = Evaluator()
+
+        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+    }
+
+    @Test
+    fun advancedRecursionTest(){
+
+        val code = """
+            
+            int F(int §n){
                 if(§n == 0 || §n == 1){
                     return 0;
                 }else{

@@ -521,6 +521,98 @@ class EvaluatorTest{
     }
 
     @Test
+    fun fibonacciFunctionTest2(){
+
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "F",
+                Body(
+                    listOf<Statement>(
+                        Statement.If(
+                            Expression.Operation(
+                                Operator.DoubleEquals,
+                                Expression.UseVariable("§n"),
+                                Expression.Value(ConstantValue.Integer(0))
+                            ),
+                            Body(
+                                listOf<Statement>(
+                                    Statement.AssignValue(
+                                        "return",
+                                        Expression.UseVariable("§n")
+                                    )
+                                )
+                            ),
+                            Body(
+                                listOf(
+                                    Statement.If(
+                                        Expression.Operation(
+                                            Operator.DoubleEquals,
+                                            Expression.UseVariable("§n"),
+                                            Expression.Value(ConstantValue.Integer(1))
+                                        ),
+                                        Body(
+                                            listOf<Statement>(
+                                                Statement.AssignValue(
+                                                    "return",
+                                                    Expression.UseVariable("§n")
+                                                )
+                                            )
+                                        ),
+                                        Body(listOf<Statement>(
+                                            Statement.AssignValue(
+                                                "return",
+                                                Expression.Operation(
+                                                    Operator.Plus,
+                                                    Expression.FunctionCall("F", listOf(
+                                                        Expression.Operation(
+                                                            Operator.Minus,
+                                                            Expression.UseVariable("§n"),
+                                                            Expression.Value(ConstantValue.Integer(1))
+                                                        )
+                                                    )),
+                                                    Expression.FunctionCall("F", listOf(
+                                                        Expression.Operation(
+                                                            Operator.Minus,
+                                                            Expression.UseVariable("§n"),
+                                                            Expression.Value(ConstantValue.Integer(2))
+                                                        )
+                                                    ))
+                                                )
+                                            )
+                                        ))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                listOf(Parameter("§n",Type.Integer))
+            ),
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.FunctionCall(
+                                "F",
+                                listOf(Expression.Value(ConstantValue.Integer(9)))
+                            )
+                        )
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(34)),evaluator.eval(declarations,null))
+    }
+
+    @Test
     fun fibonacciLoopTest(){
 
         val declarations = listOf<Declaration>(
