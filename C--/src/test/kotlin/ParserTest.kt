@@ -167,7 +167,7 @@ class ParserTest
         TestIfTreeIsAsExpected(code, tree)
     }
 
-    //@Test
+    @Test
     fun ReturnWithParametersTest()
     {
         val code = """
