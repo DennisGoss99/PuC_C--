@@ -107,6 +107,7 @@ class Evaluator {
                 if(expression.expressionB == null){
                     return when(expression.operator){
                         Operator.Not -> Expression.Value(ConstantValue.Boolean(!(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Boolean ?: throw Exception("Booleans can only be negated")).value))
+                        Operator.Minus-> Expression.Value(ConstantValue.Integer(-(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Integer ?: throw Exception("Integer can only be negated")).value))
                         else -> throw Exception("Operation ${expression.operator} needs more then one Argument")
                     }
                     throw Exception("In this position operator: '=' isn't allowed")
