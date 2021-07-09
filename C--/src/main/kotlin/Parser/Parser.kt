@@ -107,6 +107,29 @@ class Parser(val lexer: Lexer)
         return declarationList
     }
 
+    private fun OperatorStength(operator: Operator) : Pair<Int, Int>
+    {
+        return when(operator)
+        {
+            Operator.Not ->  1 to 2
+            Operator.Multiply -> 3 to 4
+
+            Operator.Plus, Operator.Minus -> 5 to 6
+
+            Operator.Less,
+            Operator.LessEqual,
+            Operator.Greater,
+            Operator.GreaterEquals -> 7 to 8
+
+            Operator.And,
+            Operator.Or,
+            Operator.DoubleEquals,
+            Operator.NotEqual -> 9 to 10
+
+            Operator.Equals -> 11 to 12
+        }
+    }
+
     private fun NameParse(): String
     {
         val token = GetTextToken()
@@ -282,12 +305,28 @@ class Parser(val lexer: Lexer)
         }
     }
 
+    private fun CalulationParse(operator : Operator) : Expression.Operation
+    {
+        val expression = ExpressionParse()
+
+        return Expression.Operation(operator, expression, null)
+    }
+
     private fun CalulationParse(leftExpression : Expression) : Expression.Operation
     {
         val operator = OperatorParse()
         val rightExpression = ExpressionParse()
 
-        return Expression.Operation(operator, leftExpression, rightExpression)
+        val operatorStrengh = OperatorStength(operator)
+
+        if(operatorStrengh.first < operatorStrengh.second)
+        {
+            return Expression.Operation(operator, leftExpression, rightExpression)
+        }
+        else
+        {
+            return Expression.Operation(operator, rightExpression, leftExpression)
+        }
     }
 
     private fun CalulationParse() : Expression.Operation
@@ -366,6 +405,64 @@ class Parser(val lexer: Lexer)
         return Expression.UseVariable(name)
     }
 
+    private fun BracketBlock() : Expression
+    {
+        val leftBracket = FetchNextExpectedToken<LexerToken.Lparen>("'('")
+        val leftBracketAgain = lexer.peek()
+
+        val expression = when(leftBracketAgain)
+        {
+            is LexerToken.Lparen ->
+            {
+                val expression = BracketBlock()
+                val next = lexer.peek()
+                val hasSomethingAfter = next !is LexerToken.Rparen
+
+                if(hasSomethingAfter)
+                {
+                    CalulationParse(expression)
+                }
+                else
+                {
+                    expression
+                }
+            }
+            is LexerToken.Minus ->
+            {
+                NegationParse()
+            }
+            //is LexerToken.Plus ->
+            is LexerToken.Number_Literal ->
+            {
+                val number = ValueParse()
+                val next = lexer.peek()
+
+                if(next is LexerToken.Rparen)
+                {
+                    number
+                }
+                else
+                {
+                    CalulationParse(number)
+                }
+            }
+            //is LexerToken.Rparen
+            else -> throw Exception("sum tig wong <$leftBracketAgain>")
+        }
+
+        val rightBracket = FetchNextExpectedToken<LexerToken.Rparen>("')'")
+
+
+        return expression
+    }
+
+    private fun NegationParse() : Expression.Operation
+    {
+        val minus = FetchNextExpectedToken<LexerToken.Minus>("Minus '-'")
+
+        return CalulationParse(Operator.Minus)
+    }
+
     private fun ExpressionParse(): Expression
     {
         var nextToken = lexer.peek()
@@ -376,6 +473,13 @@ class Parser(val lexer: Lexer)
             is LexerToken.Number_Literal -> ValueParse()
             is LexerToken.FunctionIdent -> FunctionCallParse()
             is LexerToken.NameIdent -> Expression.UseVariable(NameParse())
+
+            is LexerToken.Lparen ->
+            {
+                BracketBlock()
+            }
+
+            is LexerToken.Minus -> NegationParse()
 
             is LexerToken.AssignEquals -> {
                 GetTextToken()
@@ -403,7 +507,6 @@ class Parser(val lexer: Lexer)
             is LexerToken.LessEqual,
             is LexerToken.Greater,
             is LexerToken.GreaterEqual -> expression = CalulationParse(expression)
-
         }
 
         return expression
@@ -527,19 +630,3 @@ class Parser(val lexer: Lexer)
         return Declaration.VariableDeclaration(type, variableName, expression)
     }
 }
-
-/*
-    fun tryParseAtom(): Expression?
-    {
-        return when (val t = lexer.peek())
-        {
-            is LexerToken.Boolean_Literal -> TypeBooleanParse()
-            is LexerToken.Number_Literal -> TypeNumberParse()
-            is LexerToken.Ident -> TypeVariableParse()
-            is LexerToken.If -> KeyWordIFParse()
-            is LexerToken.Lparen -> parseParenthesized()
-            is LexerToken.Equals -> parseLet()
-            else -> null
-        }
-    }
- */
