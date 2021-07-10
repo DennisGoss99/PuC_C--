@@ -6,6 +6,8 @@ import kotlin.test.assertEquals
 
 class ParserTest
 {
+    private val _debugOutPut = false
+
     fun CallMain(statementList: List<Statement>): List<Declaration>
     {
         return CallMain(null, null, statementList);
@@ -28,16 +30,23 @@ class ParserTest
 
     fun TestIfTreeIsAsExpected(code : String, declaration: List<Declaration>)
     {
-        println("-----<Code>-----")
-        println(code)
-        println("----------------")
+        if(_debugOutPut)
+        {
+            println("-----<Code>-----")
+            println(code)
+            println("----------------")
+
+        }
 
         val lexer = Lexer(code)
         val parser = Parser(lexer)
         val parserTokenTree = parser.ParsingStart()
 
-        println(declaration)
-        println(parserTokenTree)
+        if(_debugOutPut)
+        {
+            println(declaration)
+            println(parserTokenTree)
+        }
 
         assertEquals(declaration.toString(), parserTokenTree.toString())
     }

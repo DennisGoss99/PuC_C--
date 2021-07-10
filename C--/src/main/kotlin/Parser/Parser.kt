@@ -36,7 +36,10 @@ class Parser(val lexer: Lexer)
     {
         var declarationList : List<Declaration>? = null
 
-        println("-----<Starting Parsing>-----")
+        if(_debugOutPut)
+        {
+            println("-----<Starting Parsing>-----")
+        }
 
         try
         {
@@ -50,11 +53,18 @@ class Parser(val lexer: Lexer)
         if(lexer.peek() is LexerToken.EOF)
         {
             val token = GetTextToken()
-            println("-----<Parsing OK>-----")
+
+            if(_debugOutPut)
+            {
+                println("-----<Parsing OK>-----")
+            }
         }
         else
         {
-            println("-----<Missed Tokens>-----")
+            if(_debugOutPut)
+            {
+                println("-----<Missed Tokens>-----")
+            }
 
             while(true)
             {
@@ -69,7 +79,7 @@ class Parser(val lexer: Lexer)
 
         if(declarationList == null)
         {
-            throw Exception("Parsing failed")
+            throw ParserNoData()
         }
 
         return declarationList
