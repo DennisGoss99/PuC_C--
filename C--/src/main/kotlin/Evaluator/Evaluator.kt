@@ -9,7 +9,7 @@ class Evaluator {
     private val functionDeclarations = HashMap<String, Declaration.FunctionDeclare>()
     private val globalEnvironment = HashMap<String, Expression.Value>()
 
-    fun eval( declarations: List<Declaration>, args : List<Expression.Value>? = null) : Expression.Value {
+    fun eval( declarations: List<Declaration>, args : List<Expression.Value>? = null) : Expression.Value? {
 
         declarations.forEach { d ->
             when(d){
@@ -23,13 +23,19 @@ class Evaluator {
         return evalFunction(mainFunction,args)
     }
 
-    private fun evalFunction(function : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) : Expression.Value {
+    private fun evalFunction(function : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) : Expression.Value? {
 
         if(function.parameters?.size != parameter?.size)
             throw FunctionParameterRuntimeException(function.functionName,function.parameters)
 
         val localEnvironment = HashMap<String, Expression.Value>()
         function.parameters?.zip(parameter.orEmpty()){ fp, p -> fp.name to p }?.associateTo(localEnvironment){it.first to it.second} ?: HashMap<String, Expression.Value>()
+
+        if(function.returnType == Type.Void){
+            evalBody(function.body, localEnvironment)
+            return null
+        }
+
 
         return evalBody(function.body, localEnvironment) ?: throw ReturnNotFoundRuntimeException(function.functionName)
     }
@@ -173,7 +179,7 @@ class Evaluator {
                     "ToString" -> toStringImplementation(expression.parameterList?.map { evalExpression(it,environment) } )
                     else -> {
                         val function = functionDeclarations[expression.functionName] ?: throw FunctionNotFoundRuntimeException(expression.functionName)
-                        return evalFunction(function, expression.parameterList?.map { evalExpression(it,environment) })
+                        return evalFunction(function, expression.parameterList?.map { evalExpression(it,environment) }) ?: throw ReturnNotFoundRuntimeException(expression.functionName)
                     }
                 }
             }

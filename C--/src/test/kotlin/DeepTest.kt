@@ -1,12 +1,23 @@
 import Evaluator.Evaluator
+import Evaluator.Exceptions.NotFound.VariableNotFoundRuntimeException
 import Lexer.Lexer
 import Parser.Parser
-import Parser.ParserToken.ConstantValue
-import Parser.ParserToken.Expression
+import Parser.ParserToken.*
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 
 class DeepTest {
+
+    private fun executeCode(code : String, args: List<Expression.Value>? = null): ConstantValue? {
+
+        val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+        return Evaluator().eval(parserOutput,args)?.value
+
+    }
+
 
     @Test
     fun simpleTest(){
@@ -19,11 +30,7 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(5) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(5) ,executeCode(code))
 
     }
 
@@ -38,11 +45,7 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(10) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(10) ,executeCode(code))
 
     }
 
@@ -57,11 +60,7 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(null ,evaluator.eval(parserOutput))
+        assertEquals(null ,executeCode(code))
 
     }
 
@@ -77,11 +76,7 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(10) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(10) ,executeCode(code))
     }
 
     @Test
@@ -97,11 +92,7 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(25) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(25) ,executeCode(code))
     }
 
     @Test
@@ -121,11 +112,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(14) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(14), executeCode(code))
     }
 
     @Test
@@ -142,11 +129,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(5) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(5), executeCode(code))
     }
 
     @Test
@@ -164,11 +147,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(12) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(12) ,executeCode(code))
     }
 
     @Test
@@ -186,11 +165,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(15) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(15) ,executeCode(code))
     }
 
     @Test
@@ -208,11 +183,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(25) ,evaluator.eval(parserOutput).value)
+        assertEquals(ConstantValue.Integer(25) ,executeCode(code))
     }
 
     @Test
@@ -226,11 +197,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(10) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(10)))).value)
+        assertEquals(ConstantValue.Integer(10) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(10)))))
     }
 
     @Test
@@ -248,11 +215,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(10) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(5)))).value)
+        assertEquals(ConstantValue.Integer(10) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(5)))))
     }
 
     @Test
@@ -266,11 +229,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(64) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(5)))).value)
+        assertEquals(ConstantValue.Integer(64) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(5)))))
     }
 
     @Test
@@ -284,11 +243,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(24) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(5)))).value)
+        assertEquals(ConstantValue.Integer(24) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(5)))))
     }
 
     @Test
@@ -305,11 +260,24 @@ class DeepTest {
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
+        assertEquals(ConstantValue.Integer(2576), executeCode(code))
 
-        var evaluator = Evaluator()
+    }
 
-        assertEquals(ConstantValue.Integer(2576), evaluator.eval(parserOutput).value)
+    @Test
+    fun boolTest(){
+
+        val code = """
+            
+            bool Main(){
+                return !(!((5 != 6) == true) || !( 6 < 7 || ( true != false)));
+            }
+            
+            
+            
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Boolean(true), executeCode(code))
 
     }
 
@@ -336,11 +304,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+        assertEquals(ConstantValue.Integer(34) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(9)))))
     }
 
     @Test
@@ -362,11 +326,7 @@ class DeepTest {
             }
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
-
-        var evaluator = Evaluator()
-
-        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+        assertEquals(ConstantValue.Integer(34) ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(9)))))
     }
 
     @Test
@@ -374,19 +334,129 @@ class DeepTest {
 
         val code = """
             
-            int Main(){
-                Println("Hallo Welt");            
             
-                return 0;
+            int Main(){
+            
+                int §a = 45;
+                
+                {
+                    int §a = §a + 3 
+                    return §a;               
+                }
             }
             
         """.trimIndent()
 
-        val parserOutput = Parser(Lexer(code)).ParsingStart()
+        assertEquals(ConstantValue.Integer(48) ,executeCode(code))
 
-        var evaluator = Evaluator()
+    }
 
-        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput).value)
+    @Test
+    fun shadowingTest2(){
+
+        val code = """
+            
+            
+            int Main(){
+            
+                int §a = 45;
+                
+                {
+                    int §a = 3;        
+                }
+                return §a; 
+            }
+            
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(45) ,executeCode(code))
+
+    }
+
+    @Test
+    fun shadowingTest3(){
+
+        val code = """
+            
+            
+            int Main(){
+            
+                int §a = 45;
+                
+                {
+                    int §a = 3;        
+                    int §b = 5;
+                }
+                return §b; 
+            }
+            
+        """.trimIndent()
+
+        assertFailsWith<VariableNotFoundRuntimeException> {executeCode(code)}
+
+    }
+
+    @Test
+    fun shadowingTest4(){
+
+        val code = """
+            
+            
+            int Main(){
+            
+                int §a = 1;
+                
+                {
+                    int §a = §a + §a;        
+                    int §b = §a + 3;
+                    {
+                        int §a = §b - 3;
+                        return §a;    
+                    }
+                }
+            }
+            
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(2) ,executeCode(code))
+
+    }
+
+    @Test
+    fun moduloTest4(){
+
+        val code = """
+            // Pow = n^k;
+            int Pow(int §n, int §k){
+                int §returnValue = 1;
+                
+                if(§k == 0){
+                    return 1;
+                }
+                
+                while(§k >= 1){
+                    §returnValue = §returnValue * §n;
+                    §k = §k - 1;
+                }
+                
+                return §returnValue;           
+            }
+            
+            // ModResult = n % k; 
+            int Mod(int §n, int §k){
+                while(§n - §k > 0){
+                    §n = §n - §k;
+                }
+                return §n;
+            }
+            
+            int Main(){
+                return Mod(Pow(5,10),7);
+            }
+            
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(2) ,executeCode(code))
 
     }
 
