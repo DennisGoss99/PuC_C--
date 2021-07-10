@@ -461,6 +461,56 @@ class DeepTest {
         """.trimIndent()
 
         assertEquals(ConstantValue.Integer(2) ,executeCode(code))
+    }
 
+    @Test
+    fun primeHowManyTest()
+    {
+        val code = """
+             int Mod(int §n, int §k)
+             {
+                while(§n >= §k)
+                {
+                    §n = §n - §k;
+                }
+                return §n;
+            }
+            
+            
+        int Main()
+        {
+            int §x = 2;
+            int §i = 2;
+            int §quitFlag = 0;
+            int §foundPrimes = 0;
+                  
+            while(§x <= 1000)
+            {                  
+                while(§i <= §x && §quitFlag == 0)
+                {
+                    if((Mod(§x,§i) == 0) && (§x != §i))
+                    {
+                        §quitFlag = 1; // break
+                    }
+                    else
+                    {
+                        if(§i == §x)
+                        {
+                            §foundPrimes = §foundPrimes + 1;
+                        }
+                    }     
+                                   
+                    §i = §i + 1;   
+                }
+                §quitFlag = 0;
+                §i = 2;
+                §x = §x + 1;
+            }                  
+            return §foundPrimes;
+        }
+        
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(168) ,executeCode(code))
     }
 }

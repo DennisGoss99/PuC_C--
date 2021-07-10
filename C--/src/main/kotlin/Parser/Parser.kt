@@ -488,6 +488,20 @@ class Parser(val lexer: Lexer)
             is LexerToken.Not -> NotParse()
             is LexerToken.Minus -> LoneMinusParse()
 
+            is LexerToken.FunctionIdent ->
+            {
+                val expression = FunctionCallParse()
+                val next = lexer.peek()
+
+                if(next is LexerToken.Rparen)
+                {
+                    expression
+                }
+                else
+                {
+                    CalulationParse(expression)
+                }
+            }
             is LexerToken.NameIdent ->
             {
                 val expression = UseVariableParse()
