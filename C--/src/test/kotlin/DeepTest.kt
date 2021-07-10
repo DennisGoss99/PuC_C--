@@ -61,7 +61,7 @@ class DeepTest {
 
         var evaluator = Evaluator()
 
-        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+        assertEquals(null ,evaluator.eval(parserOutput))
 
     }
 
@@ -367,6 +367,27 @@ class DeepTest {
         var evaluator = Evaluator()
 
         assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+    }
+
+    @Test
+    fun shadowingTest(){
+
+        val code = """
+            
+            int Main(){
+                Println("Hallo Welt");            
+            
+                return 0;
+            }
+            
+        """.trimIndent()
+
+        val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+        var evaluator = Evaluator()
+
+        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput).value)
+
     }
 
 }
