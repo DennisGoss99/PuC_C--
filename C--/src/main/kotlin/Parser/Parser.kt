@@ -112,21 +112,25 @@ class Parser(val lexer: Lexer)
         return when(operator)
         {
             Operator.Not ->  1 to 2
-            Operator.Multiply -> 3 to 4
 
+            Operator.Multiply -> 3 to 4
             Operator.Plus, Operator.Minus -> 5 to 6
+
+
 
             Operator.Less,
             Operator.LessEqual,
             Operator.Greater,
             Operator.GreaterEquals -> 7 to 8
 
-            Operator.And,
-            Operator.Or,
+
             Operator.DoubleEquals,
             Operator.NotEqual -> 9 to 10
+            Operator.And -> 10 to 11
+            Operator.Or -> 12 to 13
 
-            Operator.Equals -> 11 to 12
+
+            Operator.Equals -> 14 to 15
         }
     }
 
@@ -317,16 +321,45 @@ class Parser(val lexer: Lexer)
         val operator = OperatorParse()
         val rightExpression = ExpressionParse()
 
-        val operatorStrengh = OperatorStength(operator)
+       return CalculationSort(operator, leftExpression, rightExpression)
+    }
 
-        if(operatorStrengh.first < operatorStrengh.second)
+    private fun CalculationSort(operator: Operator, expressionA: Expression, expressionB: Expression) : Expression.Operation
+    {
+        val operatorCurrentStrengh = OperatorStength(operator)
+
+        val bothExpressionsAreOperator =
+            (expressionA is Expression.Value || expressionA is Expression.UseVariable)
+                    &&
+            expressionB is Expression.Operation
+
+        if(bothExpressionsAreOperator)
         {
-            return Expression.Operation(operator, leftExpression, rightExpression)
+            val opB = expressionB as Expression.Operation
+
+            val operatorB = opB.operator
+            val operatorBStrengh = OperatorStength(operatorB)
+
+            var isAHigher = operatorCurrentStrengh.first < operatorBStrengh.first;
+
+            if(isAHigher)
+            {
+                val rotatedOperation = Expression.Operation(
+                    operatorB,
+                    Expression.Operation                        (
+                        operator,
+                        expressionA,
+                        expressionB.expressionA
+                    ),
+                    expressionB.expressionB
+                )
+
+                return rotatedOperation
+            }
         }
-        else
-        {
-            return Expression.Operation(operator, rightExpression, leftExpression)
-        }
+
+        return Expression.Operation(operator, expressionA, expressionB)
+
     }
 
     private fun CalulationParse() : Expression.Operation
@@ -335,7 +368,7 @@ class Parser(val lexer: Lexer)
         val operator = OperatorParse()
         val rightExpression = ExpressionParse()
 
-        return Expression.Operation(operator, leftExpression, rightExpression)
+        return CalculationSort(operator, leftExpression, rightExpression)
     }
 
     private fun ValueParse() : Expression.Value
@@ -431,7 +464,20 @@ class Parser(val lexer: Lexer)
             {
                 NegationParse()
             }
-            //is LexerToken.Plus ->
+            is LexerToken.NameIdent ->
+            {
+                val expression = UseVariableParse()
+                val next = lexer.peek()
+
+                if(next is LexerToken.Rparen)
+                {
+                    expression
+                }
+                else
+                {
+                    CalulationParse(expression)
+                }
+            }
             is LexerToken.Number_Literal ->
             {
                 val number = ValueParse()
@@ -481,7 +527,8 @@ class Parser(val lexer: Lexer)
 
             is LexerToken.Minus -> NegationParse()
 
-            is LexerToken.AssignEquals -> {
+            is LexerToken.AssignEquals ->
+            {
                 GetTextToken()
                 ExpressionParse()
             }
