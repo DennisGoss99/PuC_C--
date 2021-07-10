@@ -1,5 +1,7 @@
 package Evaluator
 
+import Evaluator.Exceptions.*
+import Evaluator.Exceptions.NotFound.*
 import Parser.ParserToken.*
 
 class Evaluator {
@@ -13,10 +15,10 @@ class Evaluator {
             when(d){
                 is Declaration.FunctionDeclare -> functionDeclarations[d.functionName] = d
                 is Declaration.VariableDeclaration -> globalEnvironment[d.name] = evalExpression(d.expression, globalEnvironment)
-                else -> throw Exception("Unknown Declaration: '$d'")
+                else -> throw UnexpectedDeclarationRuntimeException(d)
             }
         }
-        val mainFunction = functionDeclarations["Main"] ?: throw Exception("Couldn't find Function 'Main'")
+        val mainFunction = functionDeclarations["Main"] ?: throw FunctionNotFoundRuntimeException("Main")
 
         return evalFunction(mainFunction,args)
     }
@@ -24,18 +26,18 @@ class Evaluator {
     private fun evalFunction(function : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) : Expression.Value {
 
         if(function.parameters?.size != parameter?.size)
-            throw Exception("function call '${function.functionName}(${function.parameters})' has to many or to little parameter")
+            throw FunctionParameterRuntimeException(function.functionName,function.parameters)
 
         val localEnvironment = HashMap<String, Expression.Value>()
         function.parameters?.zip(parameter.orEmpty()){ fp, p -> fp.name to p }?.associateTo(localEnvironment){it.first to it.second} ?: HashMap<String, Expression.Value>()
 
-        return evalBody(function.body, localEnvironment) ?: throw Exception("Couldn't find a return statement")
+        return evalBody(function.body, localEnvironment) ?: throw ReturnNotFoundRuntimeException(function.functionName)
     }
 
     private fun evalProcedure(procedure : Declaration.FunctionDeclare, parameter: List<Expression.Value>?) {
 
         if(procedure.parameters?.size != parameter?.size)
-            throw Exception("procedure call '${procedure.functionName}(${procedure.parameters})' has to many or to little parameter")
+            throw FunctionParameterRuntimeException(procedure.functionName,procedure.parameters)
 
         val localEnvironment = HashMap<String, Expression.Value>()
         procedure.parameters?.zip(parameter.orEmpty()){ fp, p -> fp.name to p }?.associateTo(localEnvironment){it.first to it.second} ?: HashMap<String, Expression.Value>()
@@ -60,14 +62,14 @@ class Evaluator {
                              when {
                                 environment.containsKey(statement.variableName) -> environment[statement.variableName] = evalExpression(statement.expression, environment)
                                 globalEnvironment.containsKey(statement.variableName) -> globalEnvironment[statement.variableName] = evalExpression(statement.expression, environment)
-                                else -> throw Exception("Couldn't find variable '$statement.variableName}'")
+                                else -> throw VariableNotFoundRuntimeException(statement.variableName)
                             }
                         }
                     }
                 }
                 is Statement.If -> {
                     val condition = evalExpression(statement.condition, environment).value as? ConstantValue.Boolean
-                        ?: throw Exception("If condition must be of type 'bool'")
+                        ?: throw TypeMismatchRuntimeException("If condition must be of type", Type.Boolean)
                     if(condition.value){
                         evalBody(statement.ifBody, environment)?.let { return it }
                     }else{
@@ -75,7 +77,7 @@ class Evaluator {
                     }
                 }
                 is Statement.While -> {
-                    while ((evalExpression(statement.condition, environment).value as? ConstantValue.Boolean)?.value ?: throw Exception("While condition must be of type 'bool'"))
+                    while ((evalExpression(statement.condition, environment).value as? ConstantValue.Boolean)?.value ?: throw TypeMismatchRuntimeException("While condition must be of type", Type.Boolean))
                     {
                         evalBody(statement.body, environment)?.let { return it }
                     }
@@ -85,32 +87,33 @@ class Evaluator {
                         "Println" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> println(p.value.getValueAsString())}
                         "Print" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> print(p.value.getValueAsString())}
                         else -> {
-                            val procedure = functionDeclarations[statement.procedureName] ?: throw Exception("Couldn't find procedure '${statement.procedureName}'")
+                            val procedure = functionDeclarations[statement.procedureName] ?: throw FunctionNotFoundRuntimeException(statement.procedureName)
                             evalProcedure(procedure, statement.parameterList?.map { evalExpression(it,environment) })
                         }
                     }
                 }
-                is Statement.Block -> throw NotImplementedError()
-
+                is Statement.Block -> {
+                    evalBody(statement.body,environment)?.let { return it }
+                }
             }
         }
         return null
     }
 
+
     private fun evalExpression(expression: Expression, environment : HashMap<String, Expression.Value> ) : Expression.Value{
         return when(expression){
             is Expression.Value -> expression
             is Expression.UseVariable ->{
-                environment.getOrDefault(expression.variableName,null) ?: globalEnvironment.getOrDefault(expression.variableName,null) ?: throw Exception("Variable couldn't be found ${expression.variableName}")
+                environment.getOrDefault(expression.variableName,null) ?: globalEnvironment.getOrDefault(expression.variableName,null) ?: throw VariableNotFoundRuntimeException(expression.variableName)
             }
             is Expression.Operation -> {
                 if(expression.expressionB == null){
                     return when(expression.operator){
-                        Operator.Not -> Expression.Value(ConstantValue.Boolean(!(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Boolean ?: throw Exception("Booleans can only be negated")).value))
-                        Operator.Minus-> Expression.Value(ConstantValue.Integer(-(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Integer ?: throw Exception("Integer can only be negated")).value))
-                        else -> throw Exception("Operation ${expression.operator} needs more then one Argument")
+                        Operator.Not -> Expression.Value(ConstantValue.Boolean(!(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Boolean ?: throw TypeMismatchRuntimeException("This type can't be negated",Type.Boolean)).value))
+                        Operator.Minus-> Expression.Value(ConstantValue.Integer(-(evalExpression(expression.expressionA, environment).value as?  ConstantValue.Integer ?: throw TypeMismatchRuntimeException("This type can't be negated",Type.Integer)).value))
+                        else -> throw OperationRuntimeException("Needs more then one Argument", expression.operator)
                     }
-                    throw Exception("In this position operator: '=' isn't allowed")
                 }
                 else
                     return when(expression.operator){
@@ -126,20 +129,19 @@ class Evaluator {
                         Operator.LessEqual -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x<=y}
                         Operator.Greater -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>y}
                         Operator.GreaterEquals -> equalsValueNumber(evalExpression(expression.expressionA,environment),evalExpression(expression.expressionB,environment)){x,y -> x>=y}
-                        Operator.Not -> throw Exception("to many Arguments. 'Not' only needs one")
-                        Operator.Equals -> throw Exception("In this position operator: '=' isn't allowed")
+                        Operator.Not -> throw OperationRuntimeException("Needs only one Argument", expression.operator)
+                        Operator.Equals -> throw OperationRuntimeException("In this position operator isn't allowed", expression.operator)
                     }
             }
             is Expression.FunctionCall ->{
                 return when(expression.functionName){
                     "ToString" -> toStringImplementation(expression.parameterList?.map { evalExpression(it,environment) } )
                     else -> {
-                        val function = functionDeclarations.get(expression.functionName) ?: throw Exception("Couldn't find function '${expression.functionName}'")
+                        val function = functionDeclarations[expression.functionName] ?: throw FunctionNotFoundRuntimeException(expression.functionName)
                         return evalFunction(function, expression.parameterList?.map { evalExpression(it,environment) })
                     }
                 }
             }
-            else -> throw Exception("Unknown Expression '$expression'")
         }
 
 
@@ -189,6 +191,5 @@ class Evaluator {
     private fun <T> equalsValue(v1: T, v2: T, f: (T, T) -> Boolean): Expression.Value {
         return  Expression.Value( ConstantValue.Boolean(f(v1, v2)))
     }
-
 
 }

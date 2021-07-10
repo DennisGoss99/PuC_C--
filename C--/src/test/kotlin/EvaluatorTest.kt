@@ -1,7 +1,9 @@
 import Evaluator.Evaluator
+import Evaluator.Exceptions.NotFound.VariableNotFoundRuntimeException
 import Parser.ParserToken.*
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class EvaluatorTest{
 
@@ -167,6 +169,192 @@ class EvaluatorTest{
 
         assertEquals(Expression.Value(ConstantValue.Integer(20)),evaluator.eval(declarations,null))
 
+    }
+
+    @Test
+    fun simpleBlockTest(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "§a",
+                            Expression.Value(ConstantValue.Integer(20))
+                        ),
+                        Statement.Block(
+                            Body(
+                                listOf<Statement>(
+                                    Statement.AssignValue(
+                                        "return",
+                                        Expression.UseVariable("§a")
+                                    )
+                                )
+                            )
+                        )
+
+                    ),
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
+                ),
+                null
+            )
+        )
+
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(20)),evaluator.eval(declarations,null))
+    }
+
+    @Test
+    fun variableShadowingTest(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.Block(
+                            Body(
+                                listOf<Statement>(
+                                    Statement.AssignValue(
+                                        "§a",
+                                        Expression.Value(ConstantValue.Integer(2))
+                                    )
+                                ),
+                                listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(3))))
+                            )
+                        ),
+                        Statement.AssignValue(
+                            "return",
+                            Expression.UseVariable("§a")
+                        )
+                    ),
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(1))))
+                ),
+                null
+            )
+        )
+
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(1)),evaluator.eval(declarations,null))
+    }
+
+    @Test
+    fun block2Test(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "§a",
+                            Expression.Value(ConstantValue.Integer(20))
+                        ),
+                        Statement.Block(
+                            Body(
+                                listOf<Statement>(
+                                    Statement.AssignValue(
+                                        "§a",
+                                        Expression.Value(ConstantValue.Integer(10))
+                                    )
+                                )
+                            )
+                        ),
+                        Statement.AssignValue(
+                            "return",
+                            Expression.UseVariable("§a")
+                        )
+
+                    ),
+                    listOf<Declaration.VariableDeclaration>(Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(15))))
+                ),
+                null
+            )
+        )
+
+
+        var evaluator = Evaluator()
+
+        assertEquals(Expression.Value(ConstantValue.Integer(10)),evaluator.eval(declarations,null))
+    }
+
+
+    @Test
+    fun blockExternalVariableTest(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.Block(
+                            Body(
+                                listOf(),
+                                listOf(
+                                    Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(0)))
+                                )
+                            )
+                        ),
+                        Statement.AssignValue(
+                            "return",
+                            Expression.UseVariable("§a")
+                        )
+                    ),null
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertFailsWith<VariableNotFoundRuntimeException>(block = {evaluator.eval(declarations,null)})
+    }
+
+    @Test
+    fun functionExternalVariableTest(){
+        val declarations = listOf<Declaration>(
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "A",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.UseVariable("§a")
+                        )
+                    )
+                ),
+                null
+            ),
+            Declaration.FunctionDeclare(
+                Type.Integer,
+                "Main",
+                Body(
+                    listOf<Statement>(
+                        Statement.AssignValue(
+                            "return",
+                            Expression.FunctionCall(
+                                "A",
+                                null
+                            )
+                        )
+                    ),
+                    listOf(
+                        Declaration.VariableDeclaration(Type.Integer,"§a",Expression.Value(ConstantValue.Integer(0)))
+                    )
+                ),
+                null
+            )
+        )
+
+        var evaluator = Evaluator()
+
+        assertFailsWith<VariableNotFoundRuntimeException>(block = {evaluator.eval(declarations,null)})
     }
 
     @Test

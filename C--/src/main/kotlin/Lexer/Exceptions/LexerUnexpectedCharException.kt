@@ -1,6 +1,6 @@
 package Lexer.Exceptions
 
-class LexerUnexpectedCharException: Exception{
+class LexerUnexpectedCharException : Exception{
     val unexpectedChar : Char
 
     constructor(unexpectedChar : Char) : super("Unexpected char: '$unexpectedChar'"){

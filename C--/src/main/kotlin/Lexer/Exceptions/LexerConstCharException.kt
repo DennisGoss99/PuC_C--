@@ -1,4 +1,3 @@
 package Lexer.Exceptions
 
-class LexerConstCharException(message : String): Exception(message) {
-}
+class LexerConstCharException(message : String): Exception(message)
