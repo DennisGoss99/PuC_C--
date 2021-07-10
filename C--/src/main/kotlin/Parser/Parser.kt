@@ -674,6 +674,7 @@ class Parser(val lexer: Lexer)
             "string" -> Type.String
             "float" -> Type.Float
             "double" -> Type.Double
+            "void" -> Type.Void
 
             else -> throw ParserTypeUnkown(variableType)
         }
