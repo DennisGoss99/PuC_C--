@@ -273,6 +273,29 @@ class DeepTest {
     }
 
     @Test
+    fun mathTest3(){
+
+        val code = """
+            
+            int Main(){
+                // 2576
+                return -1 *( - (3*5) - ( 4 + ( 5 * (30-43)))) * (-56)  ;
+            }
+            
+            
+            
+        """.trimIndent()
+
+        val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+        var evaluator = Evaluator()
+
+        assertEquals(ConstantValue.Integer(2576), evaluator.eval(parserOutput).value)
+
+    }
+
+
+    @Test
     fun recursionTest(){
 
         val code = """
