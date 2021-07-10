@@ -46,40 +46,60 @@ class Evaluator {
     }
 
     private fun evalBody(body: Body, environment: HashMap<String, Expression.Value>) : Expression.Value? {
+
+        val localEnvironment = HashMap<String, Expression.Value>()
+        val shadowMap = mutableListOf<String>()
+
         body.localVariables?.forEach { variable ->
-            if(environment.containsKey(variable.name))
+            if(localEnvironment.containsKey(variable.name))
                 throw Exception("Variable can't be initialized twice '${variable.name}'")
 
-            environment[variable.name] = evalExpression(variable.expression, environment)
+            localEnvironment[variable.name] = evalExpression(variable.expression, combineEnvironments(environment,localEnvironment))
+        }
+
+        environment.forEach{ v->
+            if(localEnvironment.containsKey(v.key))
+                shadowMap.add(v.key)
+            else
+                localEnvironment[v.key] = v.value
         }
 
         body.functionBody.forEach { statement ->
             when(statement){
                 is Statement.AssignValue ->{
                     when(statement.variableName){
-                        "return" -> return evalExpression(statement.expression, environment)
+                        "return" -> {
+                            changeEnvironment(environment, localEnvironment, shadowMap)
+                            return evalExpression(statement.expression, localEnvironment)
+                        }
                         else -> {
                              when {
-                                environment.containsKey(statement.variableName) -> environment[statement.variableName] = evalExpression(statement.expression, environment)
-                                globalEnvironment.containsKey(statement.variableName) -> globalEnvironment[statement.variableName] = evalExpression(statement.expression, environment)
+                                 localEnvironment.containsKey(statement.variableName) -> localEnvironment[statement.variableName] = evalExpression(statement.expression, localEnvironment)
+                                globalEnvironment.containsKey(statement.variableName) -> globalEnvironment[statement.variableName] = evalExpression(statement.expression, localEnvironment)
                                 else -> throw VariableNotFoundRuntimeException(statement.variableName)
                             }
                         }
                     }
                 }
                 is Statement.If -> {
-                    val condition = evalExpression(statement.condition, environment).value as? ConstantValue.Boolean
+                    val condition = evalExpression(statement.condition, localEnvironment).value as? ConstantValue.Boolean
                         ?: throw TypeMismatchRuntimeException("If condition must be of type", Type.Boolean)
                     if(condition.value){
-                        evalBody(statement.ifBody, environment)?.let { return it }
+                        evalBody(statement.ifBody, localEnvironment)?.let {
+                            changeEnvironment(environment, localEnvironment, shadowMap)
+                            return it }
                     }else{
-                        statement.elseBody?.let { evalBody(statement.elseBody, environment)?.let { return it } }
+                        statement.elseBody?.let { evalBody(statement.elseBody, localEnvironment)?.let {
+                            changeEnvironment(environment, localEnvironment, shadowMap)
+                            return it } }
                     }
                 }
                 is Statement.While -> {
-                    while ((evalExpression(statement.condition, environment).value as? ConstantValue.Boolean)?.value ?: throw TypeMismatchRuntimeException("While condition must be of type", Type.Boolean))
+                    while ((evalExpression(statement.condition, localEnvironment).value as? ConstantValue.Boolean)?.value ?: throw TypeMismatchRuntimeException("While condition must be of type", Type.Boolean))
                     {
-                        evalBody(statement.body, environment)?.let { return it }
+                        evalBody(statement.body, localEnvironment)?.let {
+                            changeEnvironment(environment, localEnvironment, shadowMap)
+                            return it }
                     }
                 }
                 is Statement.ProcedureCall ->{
@@ -88,16 +108,31 @@ class Evaluator {
                         "Print" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> print(p.value.getValueAsString())}
                         else -> {
                             val procedure = functionDeclarations[statement.procedureName] ?: throw FunctionNotFoundRuntimeException(statement.procedureName)
-                            evalProcedure(procedure, statement.parameterList?.map { evalExpression(it,environment) })
+                            evalProcedure(procedure, statement.parameterList?.map { evalExpression(it,localEnvironment) })
                         }
                     }
                 }
                 is Statement.Block -> {
-                    evalBody(statement.body,environment)?.let { return it }
+                    evalBody(statement.body,localEnvironment)?.let {
+                        changeEnvironment(environment, localEnvironment, shadowMap)
+                        return it }
                 }
             }
         }
+
+        changeEnvironment(environment, localEnvironment, shadowMap)
         return null
+    }
+
+    private fun combineEnvironments(upperEnvironment : HashMap<String, Expression.Value>,lowerEnvironment : HashMap<String, Expression.Value>) : HashMap<String, Expression.Value>{
+        return HashMap((upperEnvironment.keys + lowerEnvironment.keys).associateWith { k -> lowerEnvironment[k] ?: upperEnvironment[k] ?: throw VariableNotFoundRuntimeException(k) })
+    }
+
+    private fun changeEnvironment(environment : HashMap<String, Expression.Value>, localEnvironment : HashMap<String, Expression.Value>,shadowMap : List<String>){
+        environment.forEach{ entry ->
+            if(!shadowMap.contains(entry.key))
+                environment[entry.key] = localEnvironment[entry.key] ?: throw Exception("Shouldn't occur")
+        }
     }
 
 
