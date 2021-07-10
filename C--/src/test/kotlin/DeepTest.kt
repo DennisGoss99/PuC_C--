@@ -47,6 +47,25 @@ class DeepTest {
     }
 
     @Test
+    fun helloWeltTest(){
+
+        val code = """
+            
+            void Main(){
+                Println("Hallo Welt");            
+            }
+            
+        """.trimIndent()
+
+        val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+        var evaluator = Evaluator()
+
+        assertEquals(ConstantValue.Integer(34) ,evaluator.eval(parserOutput, listOf(Expression.Value(ConstantValue.Integer(9)))).value)
+
+    }
+
+    @Test
     fun variableTest(){
 
         val code = """
@@ -293,7 +312,6 @@ class DeepTest {
         assertEquals(ConstantValue.Integer(2576), evaluator.eval(parserOutput).value)
 
     }
-
 
     @Test
     fun recursionTest(){
