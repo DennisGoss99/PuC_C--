@@ -531,6 +531,8 @@ class Parser(val lexer: Lexer)
         var expression = when(nextToken)
         {
             is LexerToken.Boolean_Literal,
+            is LexerToken.Char_Literal,
+            is LexerToken.String_Literal,
             is LexerToken.Number_Literal -> ValueParse()
             is LexerToken.FunctionIdent -> FunctionCallParse()
             is LexerToken.NameIdent -> Expression.UseVariable(NameParse())
@@ -642,6 +644,16 @@ class Parser(val lexer: Lexer)
         return Statement.AssignValue(token, expression)
     }
 
+    private fun ProcedureCallParse() : Statement.ProcedureCall
+    {
+        val name = FunctionIdentifyParse()
+        val parameter = ParameterParseAsExpression()
+
+        val expectedSemicolon = FetchNextExpectedToken<LexerToken.Semicolon>("';'")
+
+        return Statement.ProcedureCall(name, parameter)
+    }
+
     private fun StatementParse(): Statement
     {
         val token = lexer.peek()
@@ -653,6 +665,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.LCurlyBrace ->  BlockParse()
             is LexerToken.Return -> AssignmentParse()
             is LexerToken.NameIdent -> AssignParse()
+            is LexerToken.FunctionIdent -> ProcedureCallParse()
 
             else -> throw ParserStatementInvalid(token)
         }
