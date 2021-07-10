@@ -2,12 +2,13 @@ package Parser
 
 import Lexer.Lexer
 import Lexer.LexerToken
-import Parser.Exception.ParserInvalidDeclarationToken
+import Parser.Exception.*
 import Parser.ParserToken.*
 
 class Parser(val lexer: Lexer)
 {
     private val aplTree: Declaration.FunctionDeclare? = null
+    private val _debugOutPut = false
 
     private inline fun <reified A> FetchNextExpectedToken(expectedType: String): A {
         val next = GetTextToken()
@@ -23,7 +24,10 @@ class Parser(val lexer: Lexer)
     {
         val token = lexer.next()
 
-        println(token.toString())
+        if(_debugOutPut)
+        {
+            println(token.toString())
+        }
 
         return token
     }
@@ -82,7 +86,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.NameIdent -> VariableDeclaration(type)
             is LexerToken.FunctionIdent -> FuncitonParse(type)
 
-            else -> throw ParserInvalidDeclarationToken(nextToken)
+            else -> throw ParserDeclarationTokenInvalid(nextToken)
         }
 
         return declaration
@@ -145,7 +149,7 @@ class Parser(val lexer: Lexer)
 
         if(token !is LexerToken.NameIdent)
         {
-            throw Exception("Inavlid Name")
+            throw ParserInvalidName(token)
         }
 
         val name = token
@@ -305,7 +309,8 @@ class Parser(val lexer: Lexer)
             is LexerToken.LessEqual-> Operator.LessEqual
             is LexerToken.Greater-> Operator.Greater
             is LexerToken.GreaterEqual -> Operator.GreaterEquals
-            else-> throw Exception("Invalid/Unkown Operator <$token>.")
+
+            else -> throw ParserOperatorUnkown(token)
         }
     }
 
@@ -380,8 +385,9 @@ class Parser(val lexer: Lexer)
             is LexerToken.Number_Literal -> { Expression.Value(ConstantValue.Integer(token.n, Type.Integer)) }
             is LexerToken.Boolean_Literal -> { Expression.Value(ConstantValue.Boolean(token.b, Type.Boolean)) }
             is LexerToken.Char_Literal -> { Expression.Value(ConstantValue.Char(token.c, Type.Char)) }
-            //is LexerToken.String_Literal -> { Expression.Value(ConstantValue.String(token.b, Type.Boolean)) }
-            else -> throw java.lang.Exception("Unkown Value Type")
+            is LexerToken.String_Literal -> { Expression.Value(ConstantValue.String(token.s, Type.String)) }
+
+            else -> throw ParserValueUnkown(token)
         }
 
         return expression
@@ -411,7 +417,7 @@ class Parser(val lexer: Lexer)
 
             if(token !is LexerToken.Comma)
             {
-                throw Exception("Invalid expression <$token>")
+                throw ParserStatementInvalid(token)
             }
         }
 
@@ -492,8 +498,7 @@ class Parser(val lexer: Lexer)
                     CalulationParse(number)
                 }
             }
-            //is LexerToken.Rparen
-            else -> throw Exception("sum tig wong <$leftBracketAgain>")
+            else -> throw ParserTokenUnexpected(leftBracketAgain)
         }
 
         val rightBracket = FetchNextExpectedToken<LexerToken.Rparen>("')'")
@@ -533,7 +538,7 @@ class Parser(val lexer: Lexer)
                 ExpressionParse()
             }
 
-            else -> throw Exception("Invalid Expression <$nextToken>");
+            else -> throw ParserExpressionInvalid(nextToken);
         }
 
         var expectedSemicolon = lexer.peek()
@@ -608,7 +613,7 @@ class Parser(val lexer: Lexer)
 
         if(nextToken is LexerToken.Rparen)
         {
-            throw Exception("Condition can't be empty")
+            throw ParserConditionEmpty()
         }
 
         val expression = ExpressionParse()
@@ -638,7 +643,8 @@ class Parser(val lexer: Lexer)
             is LexerToken.LCurlyBrace ->  BlockParse()
             is LexerToken.Return -> AssignmentParse()
             is LexerToken.NameIdent -> AssignParse()
-            else -> throw Exception("Statement Parsing failure. Unexpected Token <$token>")
+
+            else -> throw ParserStatementInvalid(token)
         }
 
         return statement
@@ -658,7 +664,8 @@ class Parser(val lexer: Lexer)
             "string" -> Type.String
             "float" -> Type.Float
             "double" -> Type.Double
-            else -> throw Exception("Invalid Type is not known <$variableType>.")
+
+            else -> throw ParserTypeUnkown(variableType)
         }
     }
 
