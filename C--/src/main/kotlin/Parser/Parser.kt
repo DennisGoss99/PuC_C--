@@ -9,6 +9,7 @@ class Parser(val lexer: Lexer)
 {
     private val aplTree: Declaration.FunctionDeclare? = null
     private val _debugOutPut = false
+    private var _currentBlockDepth = 0
 
     private inline fun <reified A> FetchNextExpectedToken(expectedType: String): A {
         val next = GetTextToken()
@@ -343,12 +344,13 @@ class Parser(val lexer: Lexer)
     {
         val operatorCurrentStrengh = OperatorStength(operator)
 
+        val sameBlockDepth = (expressionA.BlockDepth == expressionB.BlockDepth)// || (expressionA.BlockDepth == -1)
         val bothExpressionsAreOperator =
             (expressionA is Expression.Value || expressionA is Expression.UseVariable)
                     &&
             expressionB is Expression.Operation
 
-        if(bothExpressionsAreOperator)
+        if(bothExpressionsAreOperator && sameBlockDepth)
         {
             val opB = expressionB as Expression.Operation
 
@@ -373,7 +375,10 @@ class Parser(val lexer: Lexer)
             }
         }
 
-        return Expression.Operation(operator, expressionA, expressionB)
+        val newOperation = Expression.Operation(operator, expressionA, expressionB)
+        newOperation.BlockDepth = minOf(expressionA.BlockDepth, expressionB.BlockDepth)
+
+        return newOperation
 
     }
 
@@ -399,6 +404,8 @@ class Parser(val lexer: Lexer)
 
             else -> throw ParserValueUnkown(token)
         }
+
+        expression.BlockDepth = _currentBlockDepth
 
         return expression
     }
@@ -459,6 +466,8 @@ class Parser(val lexer: Lexer)
         val leftBracket = FetchNextExpectedToken<LexerToken.Lparen>("'('")
         val leftBracketAgain = lexer.peek()
 
+        _currentBlockDepth++
+
         val expression = when(leftBracketAgain)
         {
             is LexerToken.Lparen ->
@@ -476,10 +485,9 @@ class Parser(val lexer: Lexer)
                     expression
                 }
             }
-            is LexerToken.Minus ->
-            {
-                NegationParse()
-            }
+            is LexerToken.Not -> NotParse()
+            is LexerToken.Minus -> LoneMinusParse()
+
             is LexerToken.NameIdent ->
             {
                 val expression = UseVariableParse()
@@ -494,6 +502,9 @@ class Parser(val lexer: Lexer)
                     CalulationParse(expression)
                 }
             }
+            is LexerToken.String_Literal,
+            is LexerToken.Char_Literal,
+            is LexerToken.Boolean_Literal,
             is LexerToken.Number_Literal ->
             {
                 val number = ValueParse()
@@ -513,15 +524,46 @@ class Parser(val lexer: Lexer)
 
         val rightBracket = FetchNextExpectedToken<LexerToken.Rparen>("')'")
 
+        expression.BlockDepth = _currentBlockDepth
+
+        _currentBlockDepth--
 
         return expression
     }
 
-    private fun NegationParse() : Expression.Operation
+    private fun NotParse() : Expression.Operation
+    {
+        val notToken = FetchNextExpectedToken<LexerToken.Not>("Not '!'")
+        val expression = ExpressionParse()
+
+        return  Expression.Operation(Operator.Not, expression,  null)
+    }
+
+    private fun LoneMinusParse() : Expression.Operation
     {
         val minus = FetchNextExpectedToken<LexerToken.Minus>("Minus '-'")
+        val nextToken = lexer.peek()
 
-        return CalulationParse(Operator.Minus)
+        if(nextToken is LexerToken.Number_Literal)
+        {
+            val value = ValueParse()
+
+            return Expression.Operation(Operator.Minus, value, null)
+        }
+        else
+        {
+            val expression = ExpressionParse()
+
+            if(expression is Expression.Operation)
+            {
+                val newE =  Expression.Operation(Operator.Minus, expression.expressionA, null)
+                val newF = Expression.Operation(expression.operator, newE, expression.expressionB)
+
+                return newF
+            }
+
+            return Expression.Operation(Operator.Minus, expression, null)
+        }
     }
 
     private fun ExpressionParse(): Expression
@@ -542,7 +584,8 @@ class Parser(val lexer: Lexer)
                 BracketBlock()
             }
 
-            is LexerToken.Minus -> NegationParse()
+            is LexerToken.Not -> NotParse()
+            is LexerToken.Minus -> LoneMinusParse()
 
             is LexerToken.AssignEquals ->
             {
@@ -570,8 +613,12 @@ class Parser(val lexer: Lexer)
             is LexerToken.Less,
             is LexerToken.LessEqual,
             is LexerToken.Greater,
-            is LexerToken.GreaterEqual -> expression = CalulationParse(expression)
+            is LexerToken.GreaterEqual -> {expression = CalulationParse(expression)}
         }
+
+
+
+        //expression.BlockDepth = _currentBlockDepth
 
         return expression
     }

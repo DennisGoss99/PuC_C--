@@ -2,6 +2,9 @@ package Parser.ParserToken
 
 sealed class Expression
 {
+    // Used for parser internaly
+    public var BlockDepth = -1
+
     override fun toString(): kotlin.String
     {
         return this.javaClass.simpleName
