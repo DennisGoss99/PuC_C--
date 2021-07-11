@@ -471,42 +471,42 @@ class DeepTest {
     fun primeHowManyTest()
     {
         val code = """
-             int Mod(int §n, int §k)
-             {
-                while(§n >= §k)
-                {
-                    §n = §n - §k;
-                }
-                return §n;
+         int Mod(int §n, int §k)
+         {
+            while(§n >= §k)
+            {
+                §n = §n - §k;
             }
-            
+            return §n;
+        }
             
         int Main()
         {
             int §x = 2;
             int §i = 2;
-            int §quitFlag = 0;
+            bool §quitFlag = true;
             int §foundPrimes = 0;
                   
             while(§x <= 1000)
             {                  
-                while(§i <= §x && §quitFlag == 0)
+                while(§i <= §x && §quitFlag)
                 {
                     if((Mod(§x,§i) == 0) && (§x != §i))
                     {
-                        §quitFlag = 1; // break
+                        §quitFlag = false; // break
                     }
                     else
                     {
                         if(§i == §x)
                         {
                             §foundPrimes = §foundPrimes + 1;
+                            //Println(§i);
                         }
                     }     
                                    
                     §i = §i + 1;   
                 }
-                §quitFlag = 0;
+                §quitFlag = true;
                 §i = 2;
                 §x = §x + 1;
             }                  
