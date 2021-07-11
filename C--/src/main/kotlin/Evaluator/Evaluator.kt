@@ -15,7 +15,6 @@ class Evaluator {
             when(d){
                 is Declaration.FunctionDeclare -> functionDeclarations[d.functionName] = d
                 is Declaration.VariableDeclaration -> globalEnvironment[d.name] = evalExpression(d.expression, globalEnvironment)
-                else -> throw UnexpectedDeclarationRuntimeException(d)
             }
         }
         val mainFunction = functionDeclarations["Main"] ?: throw FunctionNotFoundRuntimeException("Main")

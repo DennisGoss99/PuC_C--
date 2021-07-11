@@ -4,6 +4,6 @@ class Parameter(val name : String, val type : Type)
 {
     override fun toString(): kotlin.String
     {
-        return this.javaClass.simpleName
+        return "Parameter{name=$name, type=$type}"
     }
 }
