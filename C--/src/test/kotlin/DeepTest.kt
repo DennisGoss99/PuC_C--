@@ -253,36 +253,40 @@ class DeepTest {
     @Test
     fun mathTest3(){
 
-        val code = """
-            
+        val code = """            
             int Main(){
                 // 2576
                 return -1 *( - (3*5) - ( 4 + ( 5 * (30-43)))) * (-56)  ;
-            }
-            
-            
-            
+            }          
         """.trimIndent()
 
         assertEquals(ConstantValue.Integer(2576), executeCode(code))
+    }
 
+    @Test
+    fun mathTest4()
+    {
+        val code = """            
+            int Main()
+            {
+                // -200 * 30 * 3
+                return -(20 * 10) * (10 + 20) * 3 ;
+            }          
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(-18000), executeCode(code))
     }
 
     @Test
     fun boolTest(){
 
-        val code = """
-            
+        val code = """            
             bool Main(){
                 return !(!((5 != 6) == true) || !( 6 < 7 || ( true != false)));
-            }
-            
-            
-            
+            }                 
         """.trimIndent()
 
         assertEquals(ConstantValue.Boolean(true), executeCode(code))
-
     }
 
     @Test
@@ -461,7 +465,56 @@ class DeepTest {
         """.trimIndent()
 
         assertEquals(ConstantValue.Integer(2) ,executeCode(code))
-
     }
-    
+
+    @Test
+    fun primeHowManyTest()
+    {
+        val code = """
+             int Mod(int §n, int §k)
+             {
+                while(§n >= §k)
+                {
+                    §n = §n - §k;
+                }
+                return §n;
+            }
+            
+            
+        int Main()
+        {
+            int §x = 2;
+            int §i = 2;
+            int §quitFlag = 0;
+            int §foundPrimes = 0;
+                  
+            while(§x <= 1000)
+            {                  
+                while(§i <= §x && §quitFlag == 0)
+                {
+                    if((Mod(§x,§i) == 0) && (§x != §i))
+                    {
+                        §quitFlag = 1; // break
+                    }
+                    else
+                    {
+                        if(§i == §x)
+                        {
+                            §foundPrimes = §foundPrimes + 1;
+                        }
+                    }     
+                                   
+                    §i = §i + 1;   
+                }
+                §quitFlag = 0;
+                §i = 2;
+                §x = §x + 1;
+            }                  
+            return §foundPrimes;
+        }
+        
+        """.trimIndent()
+
+        assertEquals(ConstantValue.Integer(168) ,executeCode(code))
+    }
 }
