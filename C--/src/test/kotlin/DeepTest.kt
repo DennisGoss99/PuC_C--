@@ -517,4 +517,86 @@ class DeepTest {
 
         assertEquals(ConstantValue.Integer(168) ,executeCode(code))
     }
+
+    @Test
+    fun toStringPiTest(){
+
+        val code = """
+         string DivToString(int §n, int §k, int §decimalPlaces)
+         {
+            string §returnValue = "";
+            int §i = §decimalPlaces + 1;
+            int §tempNumber = §n;
+            
+            §decimalPlaces = §decimalPlaces + 1;
+                        
+            while(§i > 0)
+            {
+                int §counter = 0;
+                
+                if(§i != §decimalPlaces){
+                    §tempNumber = §tempNumber * 10;
+                }
+                
+                //Println(ToString(§tempNumber));   
+                
+                while(§tempNumber - §k >= 0){
+                    §counter = §counter + 1; 
+                    §tempNumber = §tempNumber - §k;
+                }
+                
+                //Println("Value:" + ToString(§counter));
+                //Println("Rest:" + ToString(§tempNumber));
+                //Println("---");
+                
+                if(§i == 1){
+                    int §b = §counter;
+                    §counter = 0;
+                    
+                    §tempNumber = §tempNumber * 10;
+                
+                    while(§tempNumber - §k >= 0){
+                        §counter = §counter + 1; 
+                        §tempNumber = §tempNumber - §k;
+                    }
+                                        
+                    if(§counter < 5){
+                        §returnValue = §returnValue + ToString(§b);
+                    }else{
+                        §returnValue = §returnValue + ToString(§b + 1);
+                    }
+               
+                }else{
+                    §returnValue = §returnValue + ToString(§counter);
+                }
+                
+                
+                if(§i == §decimalPlaces){
+                    §returnValue = §returnValue + ".";
+                }
+                
+                §i = §i - 1;
+            }
+            return §returnValue;
+        }
+            
+        string Main(int §dividend, int §divisor)
+        {
+            int §decimalPlaces = 14;
+                    
+            return DivToString(§dividend, §divisor, §decimalPlaces);
+        }
+        
+        """.trimIndent()
+
+        assertEquals(ConstantValue.String("64.00000000000000") ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(1024)),Expression.Value(ConstantValue.Integer(16)))))
+
+        assertEquals(ConstantValue.String("0.33928571428571") ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(19)),Expression.Value(ConstantValue.Integer(56)))))
+
+        assertEquals(ConstantValue.String("22.40000000000000") ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(1232)),Expression.Value(ConstantValue.Integer(55)))))
+
+        assertEquals(ConstantValue.String("183.09195402298851") ,executeCode(code, listOf(Expression.Value(ConstantValue.Integer(79645)),Expression.Value(ConstantValue.Integer(435)))))
+
+    }
+
 }

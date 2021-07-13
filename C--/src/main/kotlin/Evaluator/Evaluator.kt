@@ -109,8 +109,10 @@ class Evaluator {
                 }
                 is Statement.ProcedureCall ->{
                     when(statement.procedureName){
-                        "Println" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> println(p.value.getValueAsString())}
-                        "Print" -> statement.parameterList?.map { evalExpression(it,environment) }?.forEach { p -> print(p.value.getValueAsString())}
+                        "Println" -> statement.parameterList?.map { evalExpression(it,localEnvironment) }?.forEach { p -> println(p.value.getValueAsString())}
+                        "Print" -> {
+                            statement.parameterList?.map { evalExpression(it,localEnvironment) }?.forEach { p -> print(p.value.getValueAsString())}
+                        }
                         else -> {
                             val procedure = functionDeclarations[statement.procedureName] ?: throw FunctionNotFoundRuntimeException(statement.procedureName)
                             evalProcedure(procedure, statement.parameterList?.map { evalExpression(it,localEnvironment) })

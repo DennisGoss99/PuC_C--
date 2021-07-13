@@ -2,4 +2,4 @@ package TypeChecker.Exceptions
 
 import Parser.ParserToken.Type
 
-class TypeCheckerReturnTypeException(expectedType: Type?, actualType : Type ) : Exception("Return type '$actualType' doesn't match Type '$expectedType'")
+class TypeCheckerReturnTypeException(functionName : String, expectedType: Type?, actualType : Type ) : Exception("Function return type '$expectedType' of function: '$functionName' doesn't match Type '$actualType'")

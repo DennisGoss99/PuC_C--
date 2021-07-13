@@ -41,10 +41,10 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 throw TypeCheckerFunctionParameterException(functionDeclaration.functionName,it.first,it.second)
         }
 
-        checkBodyTypes(functionDeclaration.body, functionDeclaration.returnType, functionDeclaration.parameters?.associate{it.name to it.type}?.let { HashMap(it)} ?: HashMap())
+        checkBodyTypes(functionDeclaration.functionName ,functionDeclaration.body, functionDeclaration.returnType, functionDeclaration.parameters?.associate{it.name to it.type}?.let { HashMap(it)} ?: HashMap())
     }
 
-    private fun checkBodyTypes(body: Body, returnType: Type? , upperVariables: HashMap<String, Type>?){
+    private fun checkBodyTypes(functionName : String ,body: Body , returnType: Type? , upperVariables: HashMap<String, Type>?){
 
 
         val localVariables = body.localVariables?.let { HashMap(body.localVariables?.associate { it.name to it.type}) } ?: HashMap()
@@ -62,7 +62,7 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                         "return" -> {
                             val type = getExpressionType( statement.expression, combinedVariables)
                             if(returnType != type)
-                                throw TypeCheckerReturnTypeException(returnType, type)
+                                throw TypeCheckerReturnTypeException(functionName ,returnType, type)
                         }
                         else -> {
                             val type = getExpressionType( statement.expression, combinedVariables)
@@ -72,20 +72,20 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                     }
                 }
                 is Statement.Block -> {
-                    checkBodyTypes(statement.body, returnType ,combinedVariables)
+                    checkBodyTypes(functionName, statement.body, returnType ,combinedVariables)
                 }
                 is Statement.If -> {
                     val conditionType = getExpressionType(statement.condition, combinedVariables)
                     conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(conditionType)
 
-                    checkBodyTypes(statement.ifBody, returnType, combinedVariables)
-                    statement.elseBody?.let { checkBodyTypes(it, returnType, combinedVariables) }
+                    checkBodyTypes(functionName, statement.ifBody, returnType, combinedVariables)
+                    statement.elseBody?.let { checkBodyTypes(functionName, it, returnType, combinedVariables) }
                 }
                 is Statement.While -> {
                     val conditionType = getExpressionType(statement.condition, combinedVariables)
                     conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(conditionType)
 
-                    checkBodyTypes(statement.body, returnType, combinedVariables)
+                    checkBodyTypes(functionName, statement.body, returnType, combinedVariables)
                 }
                 is Statement.ProcedureCall -> {
                     if(statement.procedureName != "Println")
@@ -116,12 +116,21 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
         return when(expression){
             is Expression.Value -> expression.value.getType()
             is Expression.FunctionCall -> {
-                val function = functionDeclarations[expression.functionName] ?: throw TypeCheckerFunctionNotFoundException(expression.functionName)
+                when(expression.functionName){
+                    "ToString" -> {
+                        if(expression.parameterList == null)
+                            throw TypeCheckerFunctionParameterException("Function: 'ToString' must have one or more transfer parameters")
+                        Type.String
+                    }
+                    else -> {
+                        val function = functionDeclarations[expression.functionName] ?: throw TypeCheckerFunctionNotFoundException(expression.functionName)
 
-                if(!checkedFunction.contains(expression.functionName))
-                    checkFunctionDeclaration(function, expression.parameterList?.map { getExpressionType(it, localVariables)})
+                        if(!checkedFunction.contains(expression.functionName))
+                            checkFunctionDeclaration(function, expression.parameterList?.map { getExpressionType(it, localVariables)})
 
-                function.returnType
+                        function.returnType
+                    }
+                }
             }
             is Expression.UseVariable -> {
                 globalVariableDeclarations[expression.variableName]?.type ?: localVariables[expression.variableName] ?: throw TypeCheckerVariableNotFoundException(expression.variableName)
