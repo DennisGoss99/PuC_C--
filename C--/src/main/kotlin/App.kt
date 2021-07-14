@@ -1,69 +1,35 @@
 import Evaluator.Evaluator
 import Lexer.Lexer
 import Lexer.LexerToken
+import Parser.Parser
 import Parser.ParserToken.*
+import TypeChecker.TypeChecker
 
-fun test(input: String) {
-    println("Lexing: $input")
-    val lexer = Lexer(input)
-    while (lexer.peek() != LexerToken.EOF) {
-        println(lexer.next())
-    }
-    println(lexer.next())
+private fun executeCode(code : String, args: List<Expression.Value>? = null): ConstantValue? {
+
+    val parserOutput = Parser(Lexer(code)).ParsingStart()
+
+    TypeChecker(parserOutput, args).check()
+
+    return Evaluator().eval(parserOutput,args)?.value
+
 }
-
 fun main(){
 
     val code = """
-            int Hallo(int a, char[] b){
-            return 0;
+            string Hallo(int §a, string §b){
+            return "";
             }
+            
+            string Main(){
+                string §a = ToString(54);
+            
+            
+                return Hallo(4545,§a + ToString(50));
+            }
+            
         """.trimIndent()
 
-    test(code);
-
-
-//    val declarations = listOf<Declaration>(
-//        Declaration.FunctionDeclare(
-//            Type.Boolean,
-//            "Main",
-//            Body(
-//                listOf<Statement>(
-//                    Statement.While(
-//                        Expression.Operation(
-//                            Operator.Less,
-//                            Expression.UseVariable("§a"),
-//                            Expression.Value(ConstantValue.Integer(100))),
-//                        Body(
-//                            listOf<Statement>(
-//                                Statement.AssignValue(
-//                                    "§a",
-//                                    Expression.Operation(Operator.Plus, Expression.UseVariable("§a"), Expression.Value(ConstantValue.Integer(1)))
-//                                ),
-//                                Statement.ProcedureCall("Println", listOf(
-//                                    Expression.Operation(
-//                                        Operator.Plus,
-//                                        Expression.Value(ConstantValue.String("Nummer: ")),
-//                                        Expression.FunctionCall( "ToString", listOf( Expression.UseVariable("§a"))),
-//                                    )
-//                                )),
-//                                Statement.ProcedureCall("Println", listOf(Expression.Value(ConstantValue.String("------")))))
-//                        )
-//                    ),
-//                    Statement.AssignValue("return", Expression.UseVariable("§a"))
-//                ),
-//                listOf(
-//                    Declaration.VariableDeclaration(Type.Integer,"§a", Expression.Value(ConstantValue.Integer(0))),
-//                )
-//            ),
-//            null
-//        )
-//    )
-//
-//    var evaluator = Evaluator()
-//    evaluator.eval(declarations,null)
-
-
-
+    executeCode(code);
 
 }

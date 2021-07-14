@@ -8,8 +8,6 @@ import TypeChecker.Exceptions.*
 class TypeChecker(private val declarations: List<Declaration>, private val args : List<Expression.Value>? = null) {
 
     private val functionDeclarations = HashMap<String, Declaration.FunctionDeclare>()
-    private val checkedFunction = mutableListOf<String>()
-
     private val globalVariableDeclarations = HashMap<String, Declaration.VariableDeclaration>()
 
     fun check(){
@@ -25,12 +23,22 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
         }
 
         val mainFunction = functionDeclarations["Main"] ?: throw FunctionNotFoundRuntimeException("Main")
-        checkFunctionDeclaration(mainFunction,args?.map { getExpressionType(it, HashMap())})
+
+        checkParameter(mainFunction,args?.map { getExpressionType(it, HashMap())})
+        checkFunctionDeclaration(mainFunction)
+
+        functionDeclarations.forEach { f ->
+            if(f.key != "Main")
+                checkFunctionDeclaration(f.value)
+        }
+
     }
 
-    private fun checkFunctionDeclaration(functionDeclaration : Declaration.FunctionDeclare, args: List<Type>? = null){
-        checkedFunction.add(functionDeclaration.functionName)
+    private fun checkFunctionDeclaration(functionDeclaration : Declaration.FunctionDeclare){
+        checkBodyTypes(functionDeclaration.functionName ,functionDeclaration.body, functionDeclaration.returnType, functionDeclaration.parameters?.associate{it.name to it.type}?.let { HashMap(it)} ?: HashMap())
+    }
 
+    private fun checkParameter(functionDeclaration : Declaration.FunctionDeclare, args : List<Type>?){
         if(functionDeclaration.parameters?.size != args?.size)
             throw TypeCheckerFunctionParameterException(functionDeclaration.functionName,functionDeclaration.parameters,args)
 
@@ -41,8 +49,8 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 throw TypeCheckerFunctionParameterException(functionDeclaration.functionName,it.first,it.second)
         }
 
-        checkBodyTypes(functionDeclaration.functionName ,functionDeclaration.body, functionDeclaration.returnType, functionDeclaration.parameters?.associate{it.name to it.type}?.let { HashMap(it)} ?: HashMap())
     }
+
 
     private fun checkBodyTypes(functionName : String ,body: Body , returnType: Type? , upperVariables: HashMap<String, Type>?){
 
@@ -89,10 +97,10 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 }
                 is Statement.ProcedureCall -> {
                     if(statement.procedureName != "Println")
-                        if(!checkedFunction.contains(statement.procedureName)) {
-                            val procedure = functionDeclarations[statement.procedureName] ?: throw TypeCheckerFunctionNotFoundException(statement.procedureName)
-                            checkFunctionDeclaration(procedure, statement.parameterList?.map { getExpressionType(it, HashMap())})
-                        }
+                    {
+                        val procedure = functionDeclarations[statement.procedureName] ?: throw TypeCheckerFunctionNotFoundException(statement.procedureName)
+                        checkParameter(procedure, statement.parameterList?.map { getExpressionType(it, HashMap())})
+                    }
                 }
             }
 
@@ -124,9 +132,7 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                     }
                     else -> {
                         val function = functionDeclarations[expression.functionName] ?: throw TypeCheckerFunctionNotFoundException(expression.functionName)
-
-                        if(!checkedFunction.contains(expression.functionName))
-                            checkFunctionDeclaration(function, expression.parameterList?.map { getExpressionType(it, localVariables)})
+                        checkParameter(function, expression.parameterList?.map { getExpressionType(it, localVariables)})
 
                         function.returnType
                     }
