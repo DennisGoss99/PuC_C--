@@ -17,19 +17,17 @@ private fun executeCode(code : String, args: List<Expression.Value>? = null): Co
 fun main(){
 
     val code = """
-            string Hallo(int §a, string §b){
-            return "";
-            }
             
-            string Main(){
+            int Main(){
                 string §a = ToString(54);
             
+                
             
-                return Hallo(4545,§a + ToString(50));
+                return 50;
             }
             
         """.trimIndent()
 
-    executeCode(code);
+    println(executeCode(code))
 
 }

@@ -1,5 +1,6 @@
 import Lexer.Lexer
 import Lexer.LexerToken
+import Lexer.TestLexer
 import org.junit.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -14,14 +15,14 @@ class LexerTest : BaseLexerTest() {
             int §b = 5;
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("b"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(5),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             LexerToken.EOF,
             LexerToken.EOF
         )
@@ -37,7 +38,7 @@ class LexerTest : BaseLexerTest() {
             //int §b = 5;
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         assertEquals(LexerToken.EOF,lexer.next())
     }
@@ -53,33 +54,33 @@ class LexerTest : BaseLexerTest() {
             }
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             //if(true){
-            LexerToken.If,
-            LexerToken.Lparen,
+            LexerToken.If(),
+            LexerToken.Lparen(),
             LexerToken.Boolean_Literal(true),
-            LexerToken.Rparen,
-            LexerToken.LCurlyBrace,
+            LexerToken.Rparen(),
+            LexerToken.LCurlyBrace(),
             // int b = 123;
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("b"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(123),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             // }else{
-            LexerToken.RCurlyBrace,
-            LexerToken.Else,
-            LexerToken.LCurlyBrace,
+            LexerToken.RCurlyBrace(),
+            LexerToken.Else(),
+            LexerToken.LCurlyBrace(),
             // int baaaFF = 523;
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("baaaFF"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(523),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             // }
-            LexerToken.RCurlyBrace,
+            LexerToken.RCurlyBrace(),
             LexerToken.EOF
         )
 
@@ -97,37 +98,37 @@ class LexerTest : BaseLexerTest() {
             }
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             // int i = 5;
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("i"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(5),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             // int i = 5;
             LexerToken.TypeIdent("bool"),
             LexerToken.NameIdent("b"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(5),
-            LexerToken.Less,
+            LexerToken.Less(),
             LexerToken.Number_Literal(8),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             //if(i >= 7 && b || true )
-            LexerToken.If,
-            LexerToken.Lparen,
+            LexerToken.If(),
+            LexerToken.Lparen(),
             LexerToken.NameIdent("i"),
-            LexerToken.GreaterEqual,
+            LexerToken.GreaterEqual(),
             LexerToken.Number_Literal(7),
-            LexerToken.And,
+            LexerToken.And(),
             LexerToken.NameIdent("b"),
-            LexerToken.Or,
+            LexerToken.Or(),
             LexerToken.Boolean_Literal(true),
-            LexerToken.Rparen,
+            LexerToken.Rparen(),
             //{}
-            LexerToken.LCurlyBrace,
-            LexerToken.RCurlyBrace,
+            LexerToken.LCurlyBrace(),
+            LexerToken.RCurlyBrace(),
             LexerToken.EOF
         )
 
@@ -144,32 +145,32 @@ class LexerTest : BaseLexerTest() {
             char §c = 'h';
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("i"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Number_Literal(54534),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("char[]"),
             LexerToken.NameIdent("s"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.String_Literal("Test"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("bool"),
             LexerToken.NameIdent("b"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Boolean_Literal(true),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("char"),
             LexerToken.NameIdent("c"),
-            LexerToken.AssignEquals,
+            LexerToken.AssignEquals(),
             LexerToken.Char_Literal('h'),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             LexerToken.EOF,
         )
 
@@ -193,35 +194,35 @@ class LexerTest : BaseLexerTest() {
         // Test
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             //if(true){
-            LexerToken.If,
-            LexerToken.Lparen,
+            LexerToken.If(),
+            LexerToken.Lparen(),
             LexerToken.Boolean_Literal(false),
-            LexerToken.Rparen,
-            LexerToken.LCurlyBrace,
+            LexerToken.Rparen(),
+            LexerToken.LCurlyBrace(),
             //6 + 4312;
             LexerToken.Number_Literal(6),
-            LexerToken.Plus,
+            LexerToken.Plus(),
             LexerToken.Number_Literal(4312),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
             // }else{
-            LexerToken.RCurlyBrace,
-            LexerToken.Else,
-            LexerToken.LCurlyBrace,
+            LexerToken.RCurlyBrace(),
+            LexerToken.Else(),
+            LexerToken.LCurlyBrace(),
             // 3 + (4 + 5);
             LexerToken.Number_Literal(3),
-            LexerToken.Plus,
-            LexerToken.Lparen,
+            LexerToken.Plus(),
+            LexerToken.Lparen(),
             LexerToken.Number_Literal(4),
-            LexerToken.Plus,
+            LexerToken.Plus(),
             LexerToken.Number_Literal(5),
-            LexerToken.Rparen,
-            LexerToken.Semicolon,
+            LexerToken.Rparen(),
+            LexerToken.Semicolon(),
             // }
-            LexerToken.RCurlyBrace,
+            LexerToken.RCurlyBrace(),
             LexerToken.EOF
         )
 
@@ -238,23 +239,23 @@ class LexerTest : BaseLexerTest() {
             }
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             LexerToken.TypeIdent("int"),
             LexerToken.FunctionIdent("Hallo"),
-            LexerToken.Lparen,
+            LexerToken.Lparen(),
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("a"),
-            LexerToken.Comma,
+            LexerToken.Comma(),
             LexerToken.TypeIdent("char[]"),
             LexerToken.NameIdent("b"),
-            LexerToken.Rparen,
-            LexerToken.LCurlyBrace,
-            LexerToken.Return,
+            LexerToken.Rparen(),
+            LexerToken.LCurlyBrace(),
+            LexerToken.Return(),
             LexerToken.Number_Literal(0),
-            LexerToken.Semicolon,
-            LexerToken.RCurlyBrace,
+            LexerToken.Semicolon(),
+            LexerToken.RCurlyBrace(),
             LexerToken.EOF,
         )
 
@@ -271,21 +272,21 @@ class LexerTest : BaseLexerTest() {
             }
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
             LexerToken.TypeIdent("void"),
             LexerToken.FunctionIdent("Hallo"),
-            LexerToken.Lparen,
+            LexerToken.Lparen(),
             LexerToken.TypeIdent("char[]"),
             LexerToken.NameIdent("b"),
-            LexerToken.Rparen,
-            LexerToken.LCurlyBrace,
+            LexerToken.Rparen(),
+            LexerToken.LCurlyBrace(),
             LexerToken.NameIdent("b"),
-            LexerToken.Equals,
+            LexerToken.Equals(),
             LexerToken.String_Literal("TEST"),
-            LexerToken.Semicolon,
-            LexerToken.RCurlyBrace,
+            LexerToken.Semicolon(),
+            LexerToken.RCurlyBrace(),
             LexerToken.EOF,
         )
 
@@ -306,35 +307,35 @@ class LexerTest : BaseLexerTest() {
             };
         """.trimIndent()
 
-        val lexer = Lexer(code);
+        val lexer = TestLexer(code);
 
         val expectedLexerTokenList = listOf<LexerToken>(
-            LexerToken.Struct,
+            LexerToken.Struct(),
             LexerToken.TypeIdent("adresse"),
-            LexerToken.LCurlyBrace,
+            LexerToken.LCurlyBrace(),
 
             LexerToken.TypeIdent("char[50]"),
             LexerToken.NameIdent("name"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("char[100]"),
             LexerToken.NameIdent("strasse"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("hausnummer"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("int"),
             LexerToken.NameIdent("plz"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
             LexerToken.TypeIdent("char[50]"),
             LexerToken.NameIdent("stadt"),
-            LexerToken.Semicolon,
+            LexerToken.Semicolon(),
 
-            LexerToken.RCurlyBrace,
-            LexerToken.Semicolon,
+            LexerToken.RCurlyBrace(),
+            LexerToken.Semicolon(),
             LexerToken.EOF,
         )
 

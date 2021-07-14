@@ -2,10 +2,10 @@ package TypeChecker.Exceptions
 
 import Parser.ParserToken.*
 
-class TypeCheckerOperatorTypeException: Exception{
+class TypeCheckerOperatorTypeException: TypeCheckerBaseException{
 
-    constructor(operator : Operator, type: Type) : super("Can't use type '$type' with operator '$operator'")
+    constructor(lineOfCode : Int,operator : Operator, type: Type) : super(lineOfCode, "Can't use type '$type' with operator '$operator'")
 
-    constructor(operator : Operator, typeA: Type, typeB: Type) : super("Can't use type '$typeA' and '$typeB' with operator '$operator'")
+    constructor(lineOfCode : Int,operator : Operator, typeA: Type, typeB: Type) : super(lineOfCode, "Can't use type '$typeA' and '$typeB' with operator '$operator'")
 
 }

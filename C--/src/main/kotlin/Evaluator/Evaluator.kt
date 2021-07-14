@@ -35,7 +35,6 @@ class Evaluator {
             return null
         }
 
-
         return evalBody(function.body, localEnvironment) ?: throw ReturnNotFoundRuntimeException(function.functionName)
     }
 

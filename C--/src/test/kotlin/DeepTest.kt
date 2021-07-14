@@ -1,5 +1,4 @@
 import Evaluator.Evaluator
-import Evaluator.Exceptions.NotFound.VariableNotFoundRuntimeException
 import Lexer.Lexer
 import Parser.Parser
 import Parser.ParserToken.*
@@ -7,7 +6,6 @@ import TypeChecker.Exceptions.TypeCheckerVariableNotFoundException
 import TypeChecker.TypeChecker
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 
 class DeepTest {

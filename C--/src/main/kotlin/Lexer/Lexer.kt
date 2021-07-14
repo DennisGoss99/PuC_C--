@@ -3,10 +3,12 @@ package Lexer
 import Lexer.Exceptions.*
 import PeekableIterator
 
-class Lexer(input: String) {
+open class Lexer(input: String) {
 
     private val iterator: PeekableIterator<Char> = PeekableIterator(input.iterator())
     private var lookahead: LexerToken? = null
+
+    protected open var currentLineOfCode = 1
 
     public fun next(): LexerToken{
 
@@ -18,70 +20,70 @@ class Lexer(input: String) {
             return LexerToken.EOF
 
         return when (val c = iterator.next()) {
-            '(' -> LexerToken.Lparen
-            ')' -> LexerToken.Rparen
-            '[' -> LexerToken.LBracket
-            ']' -> LexerToken.RBracket
-            '{' -> LexerToken.LCurlyBrace
-            '}' -> LexerToken.RCurlyBrace
-            ';' -> LexerToken.Semicolon
-            ',' -> LexerToken.Comma
+            '(' -> LexerToken.Lparen(currentLineOfCode)
+            ')' -> LexerToken.Rparen(currentLineOfCode)
+            '[' -> LexerToken.LBracket(currentLineOfCode)
+            ']' -> LexerToken.RBracket(currentLineOfCode)
+            '{' -> LexerToken.LCurlyBrace(currentLineOfCode)
+            '}' -> LexerToken.RCurlyBrace(currentLineOfCode)
+            ';' -> LexerToken.Semicolon(currentLineOfCode)
+            ',' -> LexerToken.Comma(currentLineOfCode)
 
-            '+' -> LexerToken.Plus
-            '-' -> LexerToken.Minus
-            '*' -> LexerToken.Mul
+            '+' -> LexerToken.Plus(currentLineOfCode)
+            '-' -> LexerToken.Minus(currentLineOfCode)
+            '*' -> LexerToken.Mul(currentLineOfCode)
             '=' -> when (iterator.peek()) {
                 '=' -> {
                     iterator.next()
-                    LexerToken.Double_Equals
+                    LexerToken.Double_Equals(currentLineOfCode)
                 }
-                else -> LexerToken.AssignEquals
+                else -> LexerToken.AssignEquals(currentLineOfCode)
             }
             ':' -> when (iterator.peek()) {
                 '=' -> {
                     iterator.next()
-                    LexerToken.Equals
+                    LexerToken.Equals(currentLineOfCode)
                 }
                 else -> throw LexerUnexpectedCharException(c,':')
             }
             '&' -> when (iterator.peek()) {
                 '&' -> {
                     iterator.next()
-                    LexerToken.And
+                    LexerToken.And(currentLineOfCode)
                 }
                 else -> throw LexerUnexpectedCharException(c,'&')
             }
             '|' -> when (iterator.peek()) {
                 '|' -> {
                     iterator.next()
-                    LexerToken.Or
+                    LexerToken.Or(currentLineOfCode)
                 }
                 else -> throw LexerUnexpectedCharException(c,'|')
             }
             '!' -> when (iterator.peek()) {
                 '=' -> {
                     iterator.next()
-                    LexerToken.NotEqual
+                    LexerToken.NotEqual(currentLineOfCode)
                 }
-                else -> LexerToken.Not
+                else -> LexerToken.Not(currentLineOfCode)
             }
             '<' -> when (iterator.peek()) {
                 '=' -> {
                     iterator.next()
-                    LexerToken.LessEqual
+                    LexerToken.LessEqual(currentLineOfCode)
                 }
-                else -> LexerToken.Less
+                else -> LexerToken.Less(currentLineOfCode)
             }
             '>' -> when (iterator.peek()) {
                 '=' -> {
                     iterator.next()
-                    LexerToken.GreaterEqual
+                    LexerToken.GreaterEqual(currentLineOfCode)
                 }
-                else -> LexerToken.Greater
+                else -> LexerToken.Greater(currentLineOfCode)
             }
 
             '§' -> if (iterator.peek().isJavaIdentifierStart()) {
-                LexerToken.NameIdent(identBase(iterator.next()))
+                LexerToken.NameIdent(identBase(iterator.next()), currentLineOfCode)
             }else
                 throw LexerUnexpectedCharException(c,'§')
 
@@ -109,7 +111,7 @@ class Lexer(input: String) {
         while (iterator.hasNext() && iterator.peek().isDigit()) {
             result += iterator.next()
         }
-        return LexerToken.Number_Literal(result.toInt())
+        return LexerToken.Number_Literal(result.toInt(), currentLineOfCode)
     }
 
     private fun identBase(c: Char): String {
@@ -124,18 +126,18 @@ class Lexer(input: String) {
         var result = identBase(c);
 
         return when (result) {
-            "true" -> LexerToken.Boolean_Literal(true)
-            "false" -> LexerToken.Boolean_Literal(false)
-            "if" -> LexerToken.If
-            "else" -> LexerToken.Else
-            "while" -> LexerToken.While
-            "return" -> LexerToken.Return
-            "struct" -> LexerToken.Struct
+            "true" -> LexerToken.Boolean_Literal(true, currentLineOfCode)
+            "false" -> LexerToken.Boolean_Literal(false, currentLineOfCode)
+            "if" -> LexerToken.If(currentLineOfCode)
+            "else" -> LexerToken.Else(currentLineOfCode)
+            "while" -> LexerToken.While(currentLineOfCode)
+            "return" -> LexerToken.Return(currentLineOfCode)
+            "struct" -> LexerToken.Struct(currentLineOfCode)
             else -> {
                 if(result[0].isLowerCase())
-                    LexerToken.TypeIdent(result)
+                    LexerToken.TypeIdent(result, currentLineOfCode)
                 else
-                    LexerToken.FunctionIdent(result)
+                    LexerToken.FunctionIdent(result, currentLineOfCode)
             }
         }
     }
@@ -150,7 +152,7 @@ class Lexer(input: String) {
                 if(iterator.next() != '\'')
                     throw LexerConstCharException("Char can only be a single char")
 
-                return LexerToken.Char_Literal(c);
+                return LexerToken.Char_Literal(c, currentLineOfCode);
             }
         }
 
@@ -159,7 +161,7 @@ class Lexer(input: String) {
     private fun getString(): LexerToken {
 
         return when(val c = iterator.next()){
-            '\"' -> LexerToken.String_Literal("");
+            '\"' -> LexerToken.String_Literal("", currentLineOfCode);
             else -> {
                 var result = c.toString()
 
@@ -171,7 +173,7 @@ class Lexer(input: String) {
                     throw LexerConstStringException("Missing closing '\"' char")
 
                 iterator.next()
-                return LexerToken.String_Literal(result);
+                return LexerToken.String_Literal(result, currentLineOfCode);
             }
         }
 
@@ -213,6 +215,10 @@ class Lexer(input: String) {
     private fun consumeWhitespace() {
         while (iterator.hasNext()) {
             val nextChar = iterator.peek()
+
+            if(nextChar == '\n')
+                currentLineOfCode++
+
             if (!nextChar.isWhitespace()) break
             iterator.next()
         }

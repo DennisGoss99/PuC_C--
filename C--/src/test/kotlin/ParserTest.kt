@@ -1,4 +1,5 @@
 import Lexer.Lexer
+import Lexer.TestLexer
 import Parser.*
 import Parser.ParserToken.*
 import org.junit.Test
@@ -38,7 +39,7 @@ class ParserTest
 
         }
 
-        val lexer = Lexer(code)
+        val lexer = TestLexer(code)
         val parser = Parser(lexer)
         val parserTokenTree = parser.ParsingStart()
 

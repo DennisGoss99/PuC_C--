@@ -7,6 +7,8 @@ import Parser.ParserToken.*
 
 class Parser(val lexer: Lexer)
 {
+    private var currentLineOfCode = 1
+
     private val aplTree: Declaration.FunctionDeclare? = null
     private val _debugOutPut = false
     private var _currentBlockDepth = 0
@@ -24,6 +26,8 @@ class Parser(val lexer: Lexer)
     private fun GetTextToken() : LexerToken
     {
         val token = lexer.next()
+
+        currentLineOfCode = token.LineOfCode
 
         if(_debugOutPut)
         {
@@ -184,7 +188,7 @@ class Parser(val lexer: Lexer)
             val type = TypeParse()
             val name = NameParse()
             val expression = ExpressionParse()
-            val variableDeclaration = Declaration.VariableDeclaration(type, name, expression)
+            val variableDeclaration = Declaration.VariableDeclaration(type, name, expression,currentLineOfCode)
 
             localVariableList.add(variableDeclaration)
         }
@@ -298,7 +302,7 @@ class Parser(val lexer: Lexer)
         val parameter = ParameterParseAsDeclaration()
         val body = BodyParse()
 
-        return Declaration.FunctionDeclare(type, name, body,parameter)
+        return Declaration.FunctionDeclare(type, name, body,parameter,currentLineOfCode)
     }
 
     private fun OperatorParse() : Operator
@@ -329,7 +333,7 @@ class Parser(val lexer: Lexer)
     {
         val expression = ExpressionParse()
 
-        return Expression.Operation(operator, expression, null)
+        return Expression.Operation(operator, expression, null, currentLineOfCode)
     }
 
     private fun CalulationParse(leftExpression : Expression) : Expression.Operation
@@ -363,19 +367,21 @@ class Parser(val lexer: Lexer)
             {
                 val rotatedOperation = Expression.Operation(
                     operatorB,
-                    Expression.Operation                        (
+                    Expression.Operation(
                         operator,
                         expressionA,
-                        expressionB.expressionA
+                        expressionB.expressionA,
+                        currentLineOfCode
                     ),
-                    expressionB.expressionB
+                    expressionB.expressionB,
+                    currentLineOfCode
                 )
 
                 return rotatedOperation
             }
         }
 
-        val newOperation = Expression.Operation(operator, expressionA, expressionB)
+        val newOperation = Expression.Operation(operator, expressionA, expressionB,currentLineOfCode)
         newOperation.BlockDepth = minOf(expressionA.BlockDepth, expressionB.BlockDepth)
 
         return newOperation
@@ -451,14 +457,14 @@ class Parser(val lexer: Lexer)
         val name = FunctionIdentifyParse()
         val parameter = ParameterParseAsExpression()
 
-        return Expression.FunctionCall(name, parameter)
+        return Expression.FunctionCall(name, parameter, currentLineOfCode)
     }
 
     private fun UseVariableParse() : Expression.UseVariable
     {
         val name = NameParse()
 
-        return Expression.UseVariable(name)
+        return Expression.UseVariable(name, currentLineOfCode)
     }
 
     private fun BracketBlock() : Expression
@@ -550,7 +556,7 @@ class Parser(val lexer: Lexer)
         val notToken = FetchNextExpectedToken<LexerToken.Not>("Not '!'")
         val expression = ExpressionParse()
 
-        return  Expression.Operation(Operator.Not, expression,  null)
+        return  Expression.Operation(Operator.Not, expression,  null, currentLineOfCode)
     }
 
     private fun LoneMinusParse() : Expression.Operation
@@ -562,7 +568,7 @@ class Parser(val lexer: Lexer)
         {
             val value = ValueParse()
 
-            return Expression.Operation(Operator.Minus, value, null)
+            return Expression.Operation(Operator.Minus, value, null, currentLineOfCode)
         }
         else
         {
@@ -570,13 +576,13 @@ class Parser(val lexer: Lexer)
 
             if(expression is Expression.Operation)
             {
-                val newE =  Expression.Operation(Operator.Minus, expression.expressionA, null)
-                val newF = Expression.Operation(expression.operator, newE, expression.expressionB)
+                val newE =  Expression.Operation(Operator.Minus, expression.expressionA, null, currentLineOfCode)
+                val newF = Expression.Operation(expression.operator, newE, expression.expressionB, currentLineOfCode)
 
                 return newF
             }
 
-            return Expression.Operation(Operator.Minus, expression, null)
+            return Expression.Operation(Operator.Minus, expression, null, currentLineOfCode)
         }
     }
 
@@ -591,7 +597,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.String_Literal,
             is LexerToken.Number_Literal -> ValueParse()
             is LexerToken.FunctionIdent -> FunctionCallParse()
-            is LexerToken.NameIdent -> Expression.UseVariable(NameParse())
+            is LexerToken.NameIdent -> Expression.UseVariable(NameParse(), currentLineOfCode)
 
             is LexerToken.Lparen ->
             {
@@ -642,14 +648,14 @@ class Parser(val lexer: Lexer)
         val type = NameParse()
         val expression = ExpressionParse()
 
-        return Statement.AssignValue(type, expression)
+        return Statement.AssignValue(type, expression, currentLineOfCode)
     }
 
     private fun BlockParse() : Statement.Block
     {
         val body = BodyParse()
 
-        return Statement.Block(body)
+        return Statement.Block(body, currentLineOfCode)
     }
 
     private fun WhileParse() : Statement.While
@@ -658,7 +664,7 @@ class Parser(val lexer: Lexer)
         val condition = ConditionParse()
         val body = BodyParse()
 
-        return  Statement.While(condition, body)
+        return  Statement.While(condition, body, currentLineOfCode)
     }
 
     private fun IfParse() : Statement.If
@@ -676,7 +682,7 @@ class Parser(val lexer: Lexer)
             elseBody = BodyParse()
         }
 
-        return Statement.If(condition, ifBody, elseBody)
+        return Statement.If(condition, ifBody, elseBody, currentLineOfCode)
     }
 
     private fun ConditionParse() : Expression
@@ -702,7 +708,7 @@ class Parser(val lexer: Lexer)
         val tokenEquals = FetchNextExpectedToken<LexerToken.AssignEquals>("Equals")
         val expression = ExpressionParse()
 
-        return Statement.AssignValue(token, expression)
+        return Statement.AssignValue(token, expression, currentLineOfCode)
     }
 
     private fun ProcedureCallParse() : Statement.ProcedureCall
@@ -712,7 +718,7 @@ class Parser(val lexer: Lexer)
 
         val expectedSemicolon = FetchNextExpectedToken<LexerToken.Semicolon>("';'")
 
-        return Statement.ProcedureCall(name, parameter)
+        return Statement.ProcedureCall(name, parameter, currentLineOfCode)
     }
 
     private fun StatementParse(): Statement
@@ -766,6 +772,6 @@ class Parser(val lexer: Lexer)
         val variableName = NameParse()
         val expression = ExpressionParse()
 
-        return Declaration.VariableDeclaration(type, variableName, expression)
+        return Declaration.VariableDeclaration(type, variableName, expression, currentLineOfCode)
     }
 }

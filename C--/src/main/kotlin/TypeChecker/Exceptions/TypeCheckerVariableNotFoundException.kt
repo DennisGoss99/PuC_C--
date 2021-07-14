@@ -1,3 +1,3 @@
 package TypeChecker.Exceptions
 
-class TypeCheckerVariableNotFoundException (variableName : String) : Exception("Couldn't find variable: '$variableName'")
+class TypeCheckerVariableNotFoundException (lineOfCode : Int,variableName : String) : TypeCheckerBaseException(lineOfCode, "Couldn't find variable: '$variableName'")

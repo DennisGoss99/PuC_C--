@@ -1,11 +1,9 @@
-import Evaluator.Evaluator
 import Lexer.Lexer
 import Parser.Parser
 import Parser.ParserToken.*
 import TypeChecker.Exceptions.TypeCheckerReturnTypeException
 import TypeChecker.TypeChecker
 import org.junit.Test
-import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 
 class TypeCheckerTest {

@@ -40,13 +40,13 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
 
     private fun checkParameter(functionDeclaration : Declaration.FunctionDeclare, args : List<Type>?){
         if(functionDeclaration.parameters?.size != args?.size)
-            throw TypeCheckerFunctionParameterException(functionDeclaration.functionName,functionDeclaration.parameters,args)
+            throw TypeCheckerFunctionParameterException(functionDeclaration.LineOfCode ,functionDeclaration.functionName,functionDeclaration.parameters,args)
 
         val parameterCombined = functionDeclaration.parameters?.zip(args.orEmpty()){ fp, p -> fp to p }
 
         parameterCombined?.forEach {
             if(it.first.type != it.second)
-                throw TypeCheckerFunctionParameterException(functionDeclaration.functionName,it.first,it.second)
+                throw TypeCheckerFunctionParameterException(functionDeclaration.LineOfCode ,functionDeclaration.functionName,it.first,it.second)
         }
 
     }
@@ -70,12 +70,12 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                         "return" -> {
                             val type = getExpressionType( statement.expression, combinedVariables)
                             if(returnType != type)
-                                throw TypeCheckerReturnTypeException(functionName ,returnType, type)
+                                throw TypeCheckerReturnTypeException(statement.LineOfCode, functionName ,returnType, type)
                         }
                         else -> {
                             val type = getExpressionType( statement.expression, combinedVariables)
                             if (combinedVariables[statement.variableName] != type)
-                                throw TypeCheckerWrongTypeAssignmentException(statement.variableName, combinedVariables[statement.variableName] ,type)
+                                throw TypeCheckerWrongTypeAssignmentException(statement.LineOfCode, statement.variableName, combinedVariables[statement.variableName] ,type)
                         }
                     }
                 }
@@ -84,21 +84,21 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 }
                 is Statement.If -> {
                     val conditionType = getExpressionType(statement.condition, combinedVariables)
-                    conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(conditionType)
+                    conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(statement.LineOfCode, conditionType)
 
                     checkBodyTypes(functionName, statement.ifBody, returnType, combinedVariables)
                     statement.elseBody?.let { checkBodyTypes(functionName, it, returnType, combinedVariables) }
                 }
                 is Statement.While -> {
                     val conditionType = getExpressionType(statement.condition, combinedVariables)
-                    conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(conditionType)
+                    conditionType as? Type.Boolean ?: throw TypeCheckerConditionException(statement.LineOfCode, conditionType)
 
                     checkBodyTypes(functionName, statement.body, returnType, combinedVariables)
                 }
                 is Statement.ProcedureCall -> {
                     if(statement.procedureName != "Println")
                     {
-                        val procedure = functionDeclarations[statement.procedureName] ?: throw TypeCheckerFunctionNotFoundException(statement.procedureName)
+                        val procedure = functionDeclarations[statement.procedureName] ?: throw TypeCheckerFunctionNotFoundException(statement.LineOfCode, statement.procedureName)
                         checkParameter(procedure, statement.parameterList?.map { getExpressionType(it, HashMap())})
                     }
                 }
@@ -117,7 +117,7 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
     private fun checkVariableDeclaration(variableDeclaration: Declaration.VariableDeclaration, localVariables : HashMap<String, Type>) {
         val type = getExpressionType(variableDeclaration.expression, localVariables)
         if(variableDeclaration.type != type)
-            throw TypeCheckerWrongTypeAssignmentException(variableDeclaration.name, variableDeclaration.type, type)
+            throw TypeCheckerWrongTypeAssignmentException(variableDeclaration.LineOfCode, variableDeclaration.name, variableDeclaration.type, type)
     }
 
     private fun getExpressionType(expression: Expression, localVariables : HashMap<String, Type>): Type {
@@ -127,11 +127,11 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 when(expression.functionName){
                     "ToString" -> {
                         if(expression.parameterList == null)
-                            throw TypeCheckerFunctionParameterException("Function: 'ToString' must have one or more transfer parameters")
+                            throw TypeCheckerFunctionParameterException(expression.LineOfCode, "Function: 'ToString' must have one or more transfer parameters")
                         Type.String
                     }
                     else -> {
-                        val function = functionDeclarations[expression.functionName] ?: throw TypeCheckerFunctionNotFoundException(expression.functionName)
+                        val function = functionDeclarations[expression.functionName] ?: throw TypeCheckerFunctionNotFoundException(expression.LineOfCode, expression.functionName)
                         checkParameter(function, expression.parameterList?.map { getExpressionType(it, localVariables)})
 
                         function.returnType
@@ -139,23 +139,23 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                 }
             }
             is Expression.UseVariable -> {
-                globalVariableDeclarations[expression.variableName]?.type ?: localVariables[expression.variableName] ?: throw TypeCheckerVariableNotFoundException(expression.variableName)
+                globalVariableDeclarations[expression.variableName]?.type ?: localVariables[expression.variableName] ?: throw TypeCheckerVariableNotFoundException(expression.LineOfCode, expression.variableName)
             }
             is Expression.Operation -> {
                 if(expression.operator == Operator.Equals)
-                    throw TypeCheckerOperationException("Can't use Operator at this position", expression.operator)
+                    throw TypeCheckerOperationException(expression.LineOfCode, "Can't use Operator at this position", expression.operator)
 
                 if(expression.expressionB == null){
                     return when(expression.operator){
                         Operator.Not -> {
                             val typeA = getExpressionType(expression.expressionA, localVariables)
-                            typeA as? Type.Boolean ?: throw TypeCheckerOperatorTypeException(Operator.Not,typeA)
+                            typeA as? Type.Boolean ?: throw TypeCheckerOperatorTypeException(expression.LineOfCode, Operator.Not,typeA)
                         }
                         Operator.Minus->  {
                             val typeA = getExpressionType(expression.expressionA, localVariables)
-                            typeA as? Type.Integer ?: throw TypeCheckerOperatorTypeException(Operator.Minus,typeA)
+                            typeA as? Type.Integer ?: throw TypeCheckerOperatorTypeException(expression.LineOfCode, Operator.Minus,typeA)
                         }
-                        else -> throw TypeCheckerOperationException("Needs more then one Argument", expression.operator)
+                        else -> throw TypeCheckerOperationException(expression.LineOfCode, "Needs more then one Argument", expression.operator)
                     }
                 }
                 else
@@ -176,8 +176,8 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
                         Operator.DoubleEquals -> checkOperatorAllTypes(Type.Boolean,expression.operator, expression.expressionA, expression.expressionB, localVariables)
                         Operator.NotEqual -> checkOperatorAllTypes(Type.Boolean,expression.operator, expression.expressionA, expression.expressionB, localVariables)
 
-                        Operator.Not -> throw TypeCheckerOperationException("Needs only one Argument", expression.operator)
-                        Operator.Equals -> throw TypeCheckerOperationException("Can't use Operator at this position", expression.operator)
+                        Operator.Not -> throw TypeCheckerOperationException(expression.LineOfCode, "Needs only one Argument", expression.operator)
+                        Operator.Equals -> throw TypeCheckerOperationException(expression.LineOfCode, "Can't use Operator at this position", expression.operator)
                     }
             }
         }
@@ -185,17 +185,17 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
 
     private fun <T> checkOperatorTypes(outputType : Type ,operator : Operator, expressionA: Expression, expressionB: Expression, localVariables : HashMap<String, Type>): Type {
         val typeA = getExpressionType(expressionA, localVariables)
-        typeA as? T ?: throw TypeCheckerOperatorTypeException(operator, typeA)
+        typeA as? T ?: throw TypeCheckerOperatorTypeException(expressionA.LineOfCode ,operator, typeA)
         val typeB = getExpressionType(expressionB, localVariables)
-        typeB as? T ?: throw TypeCheckerOperatorTypeException(operator, typeB)
+        typeB as? T ?: throw TypeCheckerOperatorTypeException(expressionB.LineOfCode ,operator, typeB)
         return outputType
     }
 
     private fun <T> checkOperatorTypes(operator : Operator, expressionA: Expression, expressionB: Expression, localVariables : HashMap<String, Type>): T {
         val typeA = getExpressionType(expressionA, localVariables)
-        typeA as? T ?: throw TypeCheckerOperatorTypeException(operator, typeA)
+        typeA as? T ?: throw TypeCheckerOperatorTypeException(expressionA.LineOfCode ,operator, typeA)
         val typeB = getExpressionType(expressionB, localVariables)
-        typeB as? T ?: throw TypeCheckerOperatorTypeException(operator, typeB)
+        typeB as? T ?: throw TypeCheckerOperatorTypeException(expressionB.LineOfCode ,operator, typeB)
         return typeA
     }
 
@@ -204,7 +204,7 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
         val typeB = getExpressionType(expressionB, localVariables)
         if(typeA == typeB)
             return outputType
-        throw TypeCheckerOperatorTypeException(operator, typeA, typeB)
+        throw TypeCheckerOperatorTypeException(expressionA.LineOfCode ,operator, typeA, typeB)
     }
 
     private fun checkOperatorTypes(validTypes : List<Type> ,operator : Operator, expressionA: Expression, expressionB: Expression, localVariables : HashMap<String, Type>): Type {
@@ -215,9 +215,9 @@ class TypeChecker(private val declarations: List<Declaration>, private val args 
             if(validTypes.contains(typeA))
                 return typeA
             else
-                throw TypeCheckerOperatorTypeException(operator, typeA)
+                throw TypeCheckerOperatorTypeException(expressionA.LineOfCode ,operator, typeA)
         else
-            throw TypeCheckerOperatorTypeException(operator, typeA, typeB)
+            throw TypeCheckerOperatorTypeException(expressionA.LineOfCode ,operator, typeA, typeB)
     }
 
 

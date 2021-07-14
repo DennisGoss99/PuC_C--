@@ -15,15 +15,11 @@ public abstract class BaseLexerTest {
         return returnValue
     }
 
-    fun A() :Int{
-        if(true)
-            return 1
-        return 0
-    }
-
     protected fun assertEqualLexerList( expectedLexerToken : List<LexerToken> , lexer : Lexer) {
         for (lexerToken in expectedLexerToken){
-            assertEquals(lexerToken, lexer.next())
+            val nextToken = lexer.next()
+
+            assertEquals(lexerToken, nextToken)
         }
     }
 
