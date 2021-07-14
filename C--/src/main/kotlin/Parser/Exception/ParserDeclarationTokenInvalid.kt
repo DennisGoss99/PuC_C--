@@ -2,6 +2,6 @@ package Parser.Exception
 
 import Lexer.LexerToken
 
-class ParserDeclarationTokenInvalid(val invalidToken : LexerToken) : Exception("Invalid declaration. Token:<$invalidToken>")
+class ParserDeclarationTokenInvalid(val invalidToken : LexerToken) : ParserBaseException(invalidToken.LineOfCode, "Invalid declaration. Token:<$invalidToken>")
 {
 }

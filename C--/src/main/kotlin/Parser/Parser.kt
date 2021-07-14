@@ -298,6 +298,7 @@ class Parser(val lexer: Lexer)
 
     private fun FuncitonParse(type : Type): Declaration.FunctionDeclare
     {
+        val currentLineOfCode = lexer.peek().LineOfCode
         val name = FunctionIdentifyParse()
         val parameter = ParameterParseAsDeclaration()
         val body = BodyParse()
@@ -325,7 +326,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.Greater-> Operator.Greater
             is LexerToken.GreaterEqual -> Operator.GreaterEquals
 
-            else -> throw ParserOperatorUnkown(token)
+            else -> throw ParserOperatorUnknown(token)
         }
     }
 
@@ -408,7 +409,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.Char_Literal -> { Expression.Value(ConstantValue.Char(token.c, Type.Char)) }
             is LexerToken.String_Literal -> { Expression.Value(ConstantValue.String(token.s, Type.String)) }
 
-            else -> throw ParserValueUnkown(token)
+            else -> throw ParserValueUnknown(token)
         }
 
         expression.BlockDepth = _currentBlockDepth
@@ -692,7 +693,7 @@ class Parser(val lexer: Lexer)
 
         if(nextToken is LexerToken.Rparen)
         {
-            throw ParserConditionEmpty()
+            throw ParserConditionEmpty(nextToken.LineOfCode)
         }
 
         val expression = ExpressionParse()
@@ -756,7 +757,7 @@ class Parser(val lexer: Lexer)
             "double" -> Type.Double
             "void" -> Type.Void
 
-            else -> throw ParserTypeUnkown(variableType)
+            else -> throw ParserTypeUnknown(variableType)
         }
     }
 

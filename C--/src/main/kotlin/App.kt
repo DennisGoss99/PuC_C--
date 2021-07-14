@@ -17,12 +17,12 @@ private fun executeCode(code : String, args: List<Expression.Value>? = null): Co
 fun main(){
 
     val code = """
-            
-            int Main(){
+        
+        
+        
+            int Main(char §a){
                 string §a = ToString(54);
-            
-                
-            
+    
                 return 50;
             }
             
