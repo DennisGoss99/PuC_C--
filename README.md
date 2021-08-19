@@ -1,2 +1,3 @@
 # C--
-mini c
+
+Small C like programming language
