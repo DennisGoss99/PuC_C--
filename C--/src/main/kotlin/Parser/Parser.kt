@@ -466,6 +466,9 @@ class Parser(val lexer: Lexer)
         val name = NameParse()
 
         return Expression.UseVariable(name, currentLineOfCode)
+        val expression = Expression.UseVariable(name, currentLineOfCode)
+        expression.BlockDepth = _currentBlockDepth
+        return expression
     }
 
     private fun BracketBlock() : Expression
@@ -598,7 +601,7 @@ class Parser(val lexer: Lexer)
             is LexerToken.String_Literal,
             is LexerToken.Number_Literal -> ValueParse()
             is LexerToken.FunctionIdent -> FunctionCallParse()
-            is LexerToken.NameIdent -> Expression.UseVariable(NameParse(), currentLineOfCode)
+            is LexerToken.NameIdent -> UseVariableParse()
 
             is LexerToken.Lparen ->
             {
